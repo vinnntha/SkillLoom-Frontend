@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --electric-blue: #0B38E6;
+  --neon-lime: #A1FF00;
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  .bg-grid-pattern-dense {
+    background-image: 
+      linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+body {
+  background: #0B38E6;
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  overflow-x: hidden;
+}
+

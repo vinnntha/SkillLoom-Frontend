@@ -14,9 +14,9 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
   const [isSignIn, setIsSignIn] = useState<boolean>(defaultMode === "signin");
 
   return (
-    <main className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-slate-950">
-      {/* Left Column: Visual Branding & Glassmorphism Showcase (Cobalt Blue Canvas) */}
-      <section className="w-full h-full flex flex-col">
+    <main className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-slate-50 dark:bg-slate-950">
+      {/* Left Column: Visual Branding & Glassmorphism Showcase (Cobalt Blue Canvas) - Hidden on mobile */}
+      <section className="hidden lg:flex w-full h-full flex-col">
         <AuthBrandShowcase />
       </section>
 

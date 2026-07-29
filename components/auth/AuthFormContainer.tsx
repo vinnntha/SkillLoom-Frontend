@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -13,6 +14,7 @@ import {
   Sparkles,
   ArrowRight,
   Check,
+  ArrowLeft,
 } from "lucide-react";
 import { Toast, ToastType } from "@/components/ui/Toast";
 
@@ -79,15 +81,39 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center p-4 sm:p-8 lg:p-12 bg-slate-50 dark:bg-slate-950">
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[32px] p-6 sm:p-8 md:p-10 shadow-2xl relative">
+    <div className="w-full h-full flex flex-col justify-center items-center p-3 sm:p-8 lg:p-12 bg-slate-50 dark:bg-slate-950">
+      <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 md:p-10 shadow-2xl relative">
         
+        {/* Mobile Header (visible only on screens < lg) */}
+        <div className="flex lg:hidden items-center justify-between gap-4 w-full mb-4 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+          <Link href="/" className="group flex items-center gap-2">
+            <img
+              src="/logo.png"
+              alt="SkillLoom Logo"
+              className="h-6 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <span className="font-black text-sm sm:text-base tracking-tight text-[#0B38E6] dark:text-[#A1FF00] font-mono">
+              SKILL<span className="text-slate-900 dark:text-white">LOOM</span>
+            </span>
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[10px] sm:text-xs px-2.5 py-1 rounded-full transition-all duration-200 border border-slate-200/50 dark:border-slate-700/50"
+          >
+            <ArrowLeft className="w-3 h-3 text-[#0B38E6] dark:text-[#A1FF00]" />
+            <span>Kembali</span>
+          </Link>
+        </div>
+
         {/* Auth Mode Toggle Pill (Top Bar) */}
-        <div className="bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-full flex items-center mb-8 relative border border-slate-200/60 dark:border-slate-700/50">
+        <div className="bg-slate-100 dark:bg-slate-800/80 p-1 rounded-full flex items-center mb-4 sm:mb-6 relative border border-slate-200/60 dark:border-slate-700/50">
           <button
             type="button"
             onClick={() => setIsSignIn(true)}
-            className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
               isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
@@ -98,7 +124,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsSignIn(false)}
-            className={`flex-1 py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
               !isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
@@ -120,11 +146,11 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
               transition={{ duration: 0.3 }}
             >
               {/* Header */}
-              <div className="mb-6">
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   Selamat Datang Kembali
                 </h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                   Masuk ke akun SkillLoom Anda untuk melanjutkan proyek & portofolio.
                 </p>
               </div>
@@ -133,10 +159,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
               <button
                 type="button"
                 onClick={() => showToast("Menghubungkan dengan layanan Google...", "info")}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm shadow-sm active:scale-[0.99]"
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2 sm:py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm shadow-sm active:scale-[0.99]"
               >
                 {/* Official Google Icon SVG */}
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
                     d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
@@ -154,28 +180,28 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.58l3.99 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>Masuk dengan Google</span>
+                <span className="text-xs sm:text-sm">Masuk dengan Google</span>
               </button>
 
               {/* Divider */}
-              <div className="my-6 flex items-center gap-3">
+              <div className="my-4 sm:my-6 flex items-center gap-3">
                 <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
-                <span className="text-xs text-slate-400 font-mono uppercase">
+                <span className="text-[10px] sm:text-xs text-slate-400 font-mono uppercase">
                   atau masuk dengan email
                 </span>
                 <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
               </div>
 
               {/* Form Input Fields */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Email or NISN */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Email / NISN / Username
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Mail className="w-5 h-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Mail className="w-4 h-4 sm:w-5 h-5" />
                     </div>
                     <input
                       type="text"
@@ -184,19 +210,19 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       placeholder="nama@email.com atau NISN"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     />
                   </div>
                 </div>
 
                 {/* Password Input */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Kata Sandi
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Lock className="w-5 h-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Lock className="w-4 h-4 sm:w-5 h-5" />
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -205,30 +231,30 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       placeholder="Masukkan kata sandi"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-11 pr-11 py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
+                        <EyeOff className="w-4 h-4 sm:w-5 h-5" />
                       ) : (
-                        <Eye className="w-5 h-5" />
+                        <Eye className="w-4 h-4 sm:w-5 h-5" />
                       )}
                     </button>
                   </div>
                 </div>
 
                 {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between text-xs pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-300 select-none">
+                <div className="flex items-center justify-between text-[10px] sm:text-xs pt-0.5">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer"
+                      className="w-3.5 h-3.5 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer"
                     />
                     <span>Ingat Saya</span>
                   </label>
@@ -247,10 +273,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Electric Lime Submit Button */}
                 <button
                   type="submit"
-                  className="w-full mt-6 bg-[#A1FF00] hover:bg-[#8ee600] active:scale-[0.98] text-slate-950 font-black py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-base tracking-wide border border-slate-950/20"
+                  className="w-full mt-4 sm:mt-6 bg-[#A1FF00] hover:bg-[#8ee600] active:scale-[0.98] text-slate-950 font-black py-3 sm:py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide border border-slate-950/20"
                 >
                   <span>MASUK SEKARANG</span>
-                  <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                  <ArrowRight className="w-4.5 h-4.5 stroke-[2.5]" />
                 </button>
               </form>
             </motion.div>
@@ -264,32 +290,32 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
               transition={{ duration: 0.3 }}
             >
               {/* Header */}
-              <div className="mb-5">
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              <div className="mb-3 sm:mb-4">
+                <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                   Buat Akun Baru
                 </h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">
                   Pilih peran Anda di SkillLoom untuk mulai berkolaborasi.
                 </p>
               </div>
 
               {/* Role Selector Tabs */}
-              <div className="mb-6">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+              <div className="mb-4">
+                <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Pilih Peran Akun
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {/* Siswa Tab */}
                   <button
                     type="button"
                     onClick={() => setUserRole("siswa")}
-                    className={`py-3 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
                       userRole === "siswa"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.02]"
+                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
                     }`}
                   >
-                    <GraduationCap className="w-5 h-5" />
+                    <GraduationCap className="w-4 h-4 sm:w-5 h-5" />
                     <span>Siswa SMK</span>
                   </button>
 
@@ -297,43 +323,29 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("umkm")}
-                    className={`py-3 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
                       userRole === "umkm"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.02]"
+                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
                     }`}
                   >
-                    <Building className="w-5 h-5" />
+                    <Building className="w-4 h-4 sm:w-5 h-5" />
                     <span>UMKM</span>
                   </button>
-
-                  {/* Admin / Sekolah Tab 
-                  <button
-                    type="button"
-                    onClick={() => setUserRole("admin")}
-                    className={`py-3 px-2 rounded-2xl border text-xs font-bold flex flex-col items-center gap-1.5 transition-all ${
-                      userRole === "admin"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.02]"
-                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`} 
-                  > 
-                    <User className="w-5 h-5" />
-                    <span>Admin/Sekolah</span>
-                  </button> */}
                 </div> 
               </div>
 
               {/* Dynamic Registration Form Fields */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Field 1: Name depending on role */}
                 {userRole === "siswa" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Nama Lengkap Siswa
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <User className="w-5 h-5" />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <User className="w-4 h-4 sm:w-5 h-5" />
                       </div>
                       <input
                         type="text"
@@ -342,7 +354,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                         placeholder="Contoh: Budi Pratama"
                         value={formData.fullName}
                         onChange={handleInputChange}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                       />
                     </div>
                   </div>
@@ -350,12 +362,12 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
                 {userRole === "umkm" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Nama Usaha / Brand UMKM
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <Building className="w-5 h-5" />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <Building className="w-4 h-4 sm:w-5 h-5" />
                       </div>
                       <input
                         type="text"
@@ -364,7 +376,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                         placeholder="Contoh: Kopi Studio Nusantara"
                         value={formData.businessName}
                         onChange={handleInputChange}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                       />
                     </div>
                   </div>
@@ -372,12 +384,12 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
                 {userRole === "admin" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Nama Sekolah SMK / Instansi
                     </label>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <GraduationCap className="w-5 h-5" />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <GraduationCap className="w-4 h-4 sm:w-5 h-5" />
                       </div>
                       <input
                         type="text"
@@ -386,7 +398,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                         placeholder="Contoh: SMKN 1 Jakarta"
                         value={formData.schoolName}
                         onChange={handleInputChange}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                       />
                     </div>
                   </div>
@@ -394,12 +406,12 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
                 {/* Email Field */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     {userRole === "admin" ? "Email Resmi Instansi" : "Email Utama"}
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Mail className="w-5 h-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Mail className="w-4 h-4 sm:w-5 h-5" />
                     </div>
                     <input
                       type="email"
@@ -408,19 +420,19 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       placeholder="nama@domain.com"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     />
                   </div>
                 </div>
 
                 {/* Password Field */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Kata Sandi (Minimal 8 Karakter)
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Lock className="w-5 h-5" />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Lock className="w-4 h-4 sm:w-5 h-5" />
                     </div>
                     <input
                       type={showPassword ? "text" : "password"}
@@ -430,17 +442,17 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       placeholder="Buat kata sandi aman"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-11 pr-11 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
+                        <EyeOff className="w-4 h-4 sm:w-5 h-5" />
                       ) : (
-                        <Eye className="w-5 h-5" />
+                        <Eye className="w-4 h-4 sm:w-5 h-5" />
                       )}
                     </button>
                   </div>
@@ -449,7 +461,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Dropdown Field depending on role */}
                 {userRole === "siswa" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Jurusan SMK
                     </label>
                     <select
@@ -457,7 +469,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       required
                       value={formData.jurusan}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     >
                       <option value="">Pilih Jurusan Anda</option>
                       <option value="RPL">Rekayasa Perangkat Lunak (RPL)</option>
@@ -473,7 +485,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
                 {userRole === "umkm" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Jenis Kategori Usaha
                     </label>
                     <select
@@ -481,7 +493,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       required
                       value={formData.jenisUsaha}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
                     >
                       <option value="">Pilih Kategori Usaha</option>
                       <option value="Kuliner">Kuliner / Food & Beverage (F&B)</option>
@@ -496,7 +508,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
                 {userRole === "admin" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Jabatan / Peran di Sekolah
                     </label>
                     <select
@@ -517,22 +529,22 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 )}
 
                 {/* Terms & Privacy Checkbox */}
-                <div className="pt-2">
-                  <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-600 dark:text-slate-300 select-none">
+                <div className="pt-0.5">
+                  <label className="flex items-start gap-2 cursor-pointer text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 select-none">
                     <input
                       type="checkbox"
                       required
                       checked={agreeTerms}
                       onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="mt-0.5 w-4 h-4 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer"
+                      className="mt-0.5 w-3.5 h-3.5 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer"
                     />
                     <span className="leading-snug">
                       Saya menyetujui{" "}
-                      <a href="#terms" className="text-[#0B38E6] dark:text-[#A1FF00] underline font-semibold">
+                      <a href="#terms" className="text-[#0B38E6] dark:text-[#A1FF00] underline font-semibold text-[10px] sm:text-xs">
                         Syarat & Ketentuan
                       </a>{" "}
                       serta{" "}
-                      <a href="#privacy" className="text-[#0B38E6] dark:text-[#A1FF00] underline font-semibold">
+                      <a href="#privacy" className="text-[#0B38E6] dark:text-[#A1FF00] underline font-semibold text-[10px] sm:text-xs">
                         Kebijakan Privasi
                       </a>{" "}
                       SkillLoom.
@@ -543,10 +555,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Cobalt Blue Submit Button */}
                 <button
                   type="submit"
-                  className="w-full mt-4 bg-[#0B38E6] hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-base tracking-wide group"
+                  className="w-full mt-3 bg-[#0B38E6] hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-3 sm:py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide group"
                 >
                   <span>DAFTAR AKUN BARU</span>
-                  <Sparkles className="w-5 h-5 text-[#A1FF00] group-hover:rotate-12 transition-transform" />
+                  <Sparkles className="w-4 h-4 sm:w-5 h-5 text-[#A1FF00] group-hover:rotate-12 transition-transform" />
                 </button>
               </form>
             </motion.div>

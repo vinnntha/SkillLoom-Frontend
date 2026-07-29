@@ -83,7 +83,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   return (
     <div className="w-full h-full flex flex-col justify-center items-center p-3 sm:p-8 lg:p-12 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 md:p-10 shadow-2xl relative">
-        
+
         {/* Mobile Header (visible only on screens < lg) */}
         <div className="flex lg:hidden items-center justify-between gap-4 w-full mb-4 pb-3 border-b border-slate-100 dark:border-slate-800/80">
           <Link href="/" className="group flex items-center gap-2">
@@ -113,22 +113,20 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsSignIn(true)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-              isSignIn
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
+              }`}
           >
             <span>Masuk / Sign In</span>
           </button>
           <button
             type="button"
             onClick={() => setIsSignIn(false)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-              !isSignIn
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${!isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
+              }`}
           >
             <span>Daftar / Sign Up</span>
           </button>
@@ -309,11 +307,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("siswa")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
-                      userRole === "siswa"
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${userRole === "siswa"
                         ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`}
+                      }`}
                   >
                     <GraduationCap className="w-4 h-4 sm:w-5 h-5" />
                     <span>Siswa SMK</span>
@@ -323,16 +320,15 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("umkm")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
-                      userRole === "umkm"
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${userRole === "umkm"
                         ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`}
+                      }`}
                   >
                     <Building className="w-4 h-4 sm:w-5 h-5" />
                     <span>UMKM</span>
                   </button>
-                </div> 
+                </div>
               </div>
 
               {/* Dynamic Registration Form Fields */}

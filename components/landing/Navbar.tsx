@@ -91,10 +91,11 @@ export const Navbar: React.FC = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-3 max-w-7xl mx-auto bg-slate-950/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-5 shadow-2xl overflow-hidden"
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden mt-3 max-w-7xl mx-auto bg-slate-950/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-5 shadow-2xl overflow-y-auto max-h-[80vh]"
           >
             <div className="flex flex-col gap-3">
               {navLinks.map((link) => (
@@ -102,7 +103,7 @@ export const Navbar: React.FC = () => {
                   key={link.name}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-4 py-3 text-base font-semibold text-white/90 rounded-2xl hover:bg-white/10 hover:text-[#A1FF00] transition-colors flex items-center justify-between"
+                  className="px-4 py-3 text-base font-semibold text-white/90 rounded-2xl hover:bg-white/10 hover:text-[#A1FF00] transition-colors flex items-center justify-between active:scale-[0.98]"
                 >
                   <span>{link.name}</span>
                   <ArrowUpRight className="w-4 h-4 opacity-60" />
@@ -110,9 +111,9 @@ export const Navbar: React.FC = () => {
               ))}
               <div className="pt-2 border-t border-white/10 mt-1">
                 <a
-                  href="#auth"
+                  href="/auth"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 bg-[#A1FF00] text-slate-950 font-bold py-3 px-5 rounded-2xl hover:bg-[#8ee600] transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-[#A1FF00] text-slate-950 font-bold py-3.5 px-5 rounded-2xl hover:bg-[#8ee600] active:scale-[0.98] transition-all shadow-md"
                 >
                   <span>Masuk / Daftar Sekarang</span>
                   <ArrowUpRight className="w-5 h-5" />

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -13,8 +14,11 @@ import {
   GraduationCap,
   Sparkles,
   ArrowRight,
-  Check,
   ArrowLeft,
+  Phone,
+  FileText,
+  Loader2,
+  ShieldCheck,
 } from "lucide-react";
 import { Toast, ToastType } from "@/components/ui/Toast";
 
@@ -29,10 +33,12 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   isSignIn,
   setIsSignIn,
 }) => {
+  const router = useRouter();
   const [userRole, setUserRole] = useState<RoleType>("siswa");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Toast Notification State
   const [toast, setToast] = useState<{
@@ -54,7 +60,9 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     email: "",
     password: "",
     fullName: "",
+    nisn: "",
     businessName: "",
+    phoneNumber: "",
     schoolName: "",
     jurusan: "",
     jenisUsaha: "",
@@ -68,22 +76,37 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSignIn) {
-      showToast(`Selamat Datang! Berhasil masuk dengan ${formData.email}`, "success");
-    } else {
-      showToast(
-        `Registrasi [${userRole.toUpperCase()}] berhasil disubmit!`,
-        "success"
-      );
+    setIsSubmitting(true);
+
+    try {
+      // Simulate authentication API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      if (isSignIn) {
+        showToast("Berhasil masuk! Mengalihkan ke dashboard...", "success");
+        setTimeout(() => {
+          router.push(`/${userRole}`);
+        }, 1000);
+      } else {
+        showToast(
+          "Pendaftaran berhasil! Silakan masuk dengan akun Anda.",
+          "success"
+        );
+        setIsSignIn(true);
+      }
+    } catch (err) {
+      showToast("Terjadi kesalahan. Silakan coba lagi.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center p-3 sm:p-8 lg:p-12 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 md:p-10 shadow-2xl relative">
-
+        
         {/* Mobile Header (visible only on screens < lg) */}
         <div className="flex lg:hidden items-center justify-between gap-4 w-full mb-4 pb-3 border-b border-slate-100 dark:border-slate-800/80">
           <Link href="/" className="group flex items-center gap-2">
@@ -95,9 +118,6 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 e.currentTarget.style.display = "none";
               }}
             />
-            <span className="font-black text-sm sm:text-base tracking-tight text-[#0B38E6] dark:text-[#A1FF00] font-mono">
-              SKILL<span className="text-slate-900 dark:text-white">LOOM</span>
-            </span>
           </Link>
           <Link
             href="/"
@@ -113,20 +133,22 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsSignIn(true)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${isSignIn
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+              isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              }`}
+            }`}
           >
             <span>Masuk / Sign In</span>
           </button>
           <button
             type="button"
             onClick={() => setIsSignIn(false)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${!isSignIn
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+              !isSignIn
                 ? "bg-[#0B38E6] text-white shadow-md"
                 : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              }`}
+            }`}
           >
             <span>Daftar / Sign Up</span>
           </button>
@@ -159,7 +181,6 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 onClick={() => showToast("Menghubungkan dengan layanan Google...", "info")}
                 className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2 sm:py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm shadow-sm active:scale-[0.99]"
               >
-                {/* Official Google Icon SVG */}
                 <svg className="w-4 h-4 sm:w-5 h-5" viewBox="0 0 24 24">
                   <path
                     fill="#4285F4"
@@ -192,23 +213,24 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
               {/* Form Input Fields */}
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                {/* Email or NISN */}
+                {/* Email */}
                 <div>
                   <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    Email / NISN / Username
+                    Email Terdaftar
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                       <Mail className="w-4 h-4 sm:w-5 h-5" />
                     </div>
                     <input
-                      type="text"
+                      type="email"
                       name="email"
                       required
-                      placeholder="nama@email.com atau NISN"
+                      disabled={isSubmitting}
+                      placeholder="nama@email.com"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -226,10 +248,11 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       type={showPassword ? "text" : "password"}
                       name="password"
                       required
+                      disabled={isSubmitting}
                       placeholder="Masukkan kata sandi"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     />
                     <button
                       type="button"
@@ -271,10 +294,20 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Electric Lime Submit Button */}
                 <button
                   type="submit"
-                  className="w-full mt-4 sm:mt-6 bg-[#A1FF00] hover:bg-[#8ee600] active:scale-[0.98] text-slate-950 font-black py-3 sm:py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide border border-slate-950/20"
+                  disabled={isSubmitting}
+                  className="w-full mt-4 sm:mt-6 bg-[#A1FF00] hover:bg-[#8ee600] active:scale-[0.98] text-slate-950 font-black py-3 sm:py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide border border-slate-950/20 disabled:opacity-50"
                 >
-                  <span>MASUK SEKARANG</span>
-                  <ArrowRight className="w-4.5 h-4.5 stroke-[2.5]" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>MEMPROSES...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>MASUK SEKARANG</span>
+                      <ArrowRight className="w-4.5 h-4.5 stroke-[2.5]" />
+                    </>
+                  )}
                 </button>
               </form>
             </motion.div>
@@ -302,17 +335,18 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Pilih Peran Akun
                 </label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-1.5">
                   {/* Siswa Tab */}
                   <button
                     type="button"
                     onClick={() => setUserRole("siswa")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${userRole === "siswa"
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      userRole === "siswa"
                         ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                      }`}
+                    }`}
                   >
-                    <GraduationCap className="w-4 h-4 sm:w-5 h-5" />
+                    <GraduationCap className="w-4 h-4" />
                     <span>Siswa SMK</span>
                   </button>
 
@@ -320,62 +354,125 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("umkm")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${userRole === "umkm"
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      userRole === "umkm"
                         ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                      }`}
+                    }`}
                   >
-                    <Building className="w-4 h-4 sm:w-5 h-5" />
+                    <Building className="w-4 h-4" />
                     <span>UMKM</span>
                   </button>
-                </div>
+
+                  {/* Admin / Guru Tab */}
+                  <button
+                    type="button"
+                    onClick={() => setUserRole("admin")}
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
+                      userRole === "admin"
+                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
+                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
+                    }`}
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Guru/Sekolah</span>
+                  </button>
+                </div> 
               </div>
 
               {/* Dynamic Registration Form Fields */}
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                {/* Field 1: Name depending on role */}
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
+                {/* Field Name depending on role */}
                 {userRole === "siswa" && (
-                  <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                      Nama Lengkap Siswa
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        <User className="w-4 h-4 sm:w-5 h-5" />
+                  <>
+                    <div>
+                      <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Nama Lengkap Siswa
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <User className="w-4 h-4 sm:w-5 h-5" />
+                        </div>
+                        <input
+                          type="text"
+                          name="fullName"
+                          required
+                          disabled={isSubmitting}
+                          placeholder="Contoh: Budi Pratama"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        name="fullName"
-                        required
-                        placeholder="Contoh: Budi Pratama"
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
-                      />
                     </div>
-                  </div>
+
+                    <div>
+                      <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        NISN (Nomor Induk Siswa Nasional)
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <FileText className="w-4 h-4 sm:w-5 h-5" />
+                        </div>
+                        <input
+                          type="text"
+                          name="nisn"
+                          required
+                          disabled={isSubmitting}
+                          placeholder="Contoh: 0054321098"
+                          value={formData.nisn}
+                          onChange={handleInputChange}
+                          className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {userRole === "umkm" && (
-                  <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                      Nama Usaha / Brand UMKM
-                    </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        <Building className="w-4 h-4 sm:w-5 h-5" />
+                  <>
+                    <div>
+                      <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Nama Usaha / Brand UMKM
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Building className="w-4 h-4 sm:w-5 h-5" />
+                        </div>
+                        <input
+                          type="text"
+                          name="businessName"
+                          required
+                          disabled={isSubmitting}
+                          placeholder="Contoh: Kopi Studio Nusantara"
+                          value={formData.businessName}
+                          onChange={handleInputChange}
+                          className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        name="businessName"
-                        required
-                        placeholder="Contoh: Kopi Studio Nusantara"
-                        value={formData.businessName}
-                        onChange={handleInputChange}
-                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
-                      />
                     </div>
-                  </div>
+
+                    <div>
+                      <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                        Nomor Telepon / WhatsApp
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <Phone className="w-4 h-4 sm:w-5 h-5" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="phoneNumber"
+                          required
+                          disabled={isSubmitting}
+                          placeholder="Contoh: 081234567890"
+                          value={formData.phoneNumber}
+                          onChange={handleInputChange}
+                          className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {userRole === "admin" && (
@@ -391,10 +488,11 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                         type="text"
                         name="schoolName"
                         required
+                        disabled={isSubmitting}
                         placeholder="Contoh: SMKN 1 Jakarta"
                         value={formData.schoolName}
                         onChange={handleInputChange}
-                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                        className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                       />
                     </div>
                   </div>
@@ -413,10 +511,11 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       type="email"
                       name="email"
                       required
+                      disabled={isSubmitting}
                       placeholder="nama@domain.com"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -424,7 +523,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Password Field */}
                 <div>
                   <label className="block text-[10px] sm:text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-                    Kata Sandi (Minimal 8 Karakter)
+                    Kata Sandi (Minimal 6 Karakter)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
@@ -434,11 +533,12 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       type={showPassword ? "text" : "password"}
                       name="password"
                       required
-                      minLength={8}
+                      minLength={6}
+                      disabled={isSubmitting}
                       placeholder="Buat kata sandi aman"
                       value={formData.password}
                       onChange={handleInputChange}
-                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full pl-9 sm:pl-11 pr-10 sm:pr-11 py-2 sm:py-2.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     />
                     <button
                       type="button"
@@ -463,9 +563,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                     <select
                       name="jurusan"
                       required
+                      disabled={isSubmitting}
                       value={formData.jurusan}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     >
                       <option value="">Pilih Jurusan Anda</option>
                       <option value="RPL">Rekayasa Perangkat Lunak (RPL)</option>
@@ -487,9 +588,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                     <select
                       name="jenisUsaha"
                       required
+                      disabled={isSubmitting}
                       value={formData.jenisUsaha}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     >
                       <option value="">Pilih Kategori Usaha</option>
                       <option value="Kuliner">Kuliner / Food & Beverage (F&B)</option>
@@ -510,9 +612,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                     <select
                       name="jabatan"
                       required
+                      disabled={isSubmitting}
                       value={formData.jabatan}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6]"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     >
                       <option value="">Pilih Jabatan</option>
                       <option value="KepalaSekolah">Kepala Sekolah</option>
@@ -530,9 +633,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                     <input
                       type="checkbox"
                       required
+                      disabled={isSubmitting}
                       checked={agreeTerms}
                       onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="mt-0.5 w-3.5 h-3.5 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer"
+                      className="mt-0.5 w-3.5 h-3.5 rounded text-[#0B38E6] focus:ring-[#A1FF00] border-slate-300 dark:border-slate-700 cursor-pointer disabled:opacity-50"
                     />
                     <span className="leading-snug">
                       Saya menyetujui{" "}
@@ -551,10 +655,20 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                 {/* Cobalt Blue Submit Button */}
                 <button
                   type="submit"
-                  className="w-full mt-3 bg-[#0B38E6] hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-3 sm:py-4 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide group"
+                  disabled={isSubmitting}
+                  className="w-full mt-3 bg-[#0B38E6] hover:bg-blue-700 active:scale-[0.98] text-white font-bold py-3 sm:py-3.5 px-6 rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide group disabled:opacity-50"
                 >
-                  <span>DAFTAR AKUN BARU</span>
-                  <Sparkles className="w-4 h-4 sm:w-5 h-5 text-[#A1FF00] group-hover:rotate-12 transition-transform" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>MEMPROSES...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>DAFTAR AKUN BARU</span>
+                      <Sparkles className="w-4 h-4 sm:w-5 h-5 text-[#A1FF00] group-hover:rotate-12 transition-transform" />
+                    </>
+                  )}
                 </button>
               </form>
             </motion.div>

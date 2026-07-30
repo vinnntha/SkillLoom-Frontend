@@ -1,11 +1,25 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import { Navbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
-import { AboutSection } from "@/components/landing/AboutSection";
-import { FeatureSection } from "@/components/landing/FeatureSection";
-import { TestimonialSection } from "@/components/landing/TestimonialSection";
-import { ContactSection } from "@/components/landing/ContactSection";
-import { Footer } from "@/components/landing/Footer";
+
+const AboutSection = dynamic(() => import("@/components/landing/AboutSection").then(m => m.AboutSection), {
+  loading: () => <div className="min-h-[400px] bg-[#F4F6F9] animate-pulse rounded-[32px] sm:rounded-[48px]" />
+});
+
+const FeatureSection = dynamic(() => import("@/components/landing/FeatureSection").then(m => m.FeatureSection), {
+  loading: () => <div className="min-h-[300px] bg-[#0B38E6] animate-pulse" />
+});
+
+const TestimonialSection = dynamic(() => import("@/components/landing/TestimonialSection").then(m => m.TestimonialSection), {
+  loading: () => <div className="min-h-[300px] bg-[#0B38E6] animate-pulse" />
+});
+
+const ContactSection = dynamic(() => import("@/components/landing/ContactSection").then(m => m.ContactSection), {
+  loading: () => <div className="min-h-[350px] bg-[#0B38E6] animate-pulse" />
+});
+
+const Footer = dynamic(() => import("@/components/landing/Footer").then(m => m.Footer));
 
 export default function Home() {
   return (

@@ -56,5 +56,7 @@ yarn-error.log*
 next-env.d.ts
 
 .agent
+.promt.md
+.md
 
 >>>>>>> 1cc1f9b (landing page)

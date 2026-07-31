@@ -65,8 +65,8 @@ export default function SiswaDashboardLayout({
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 p-6 shrink-0 h-screen sticky top-0">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-[#0B38E6] flex items-center justify-center text-[#A1FF00] font-black text-xl shadow-md shadow-[#0B38E6]/25">
-            SL
+          <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0">
+            <img src="/logo1.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
           </div>
           <div>
             <h1 className="font-extrabold text-lg text-slate-900 tracking-tight">SkillLoom</h1>
@@ -127,8 +127,8 @@ export default function SiswaDashboardLayout({
       {/* Mobile Top Header */}
       <header className="md:hidden bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-[#0B38E6] flex items-center justify-center text-[#A1FF00] font-black text-lg shadow-sm">
-            SL
+          <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-sm overflow-hidden shrink-0">
+            <img src="/logo.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
           </div>
           <div>
             <h1 className="font-bold text-md text-slate-900">SkillLoom</h1>
@@ -155,8 +155,8 @@ export default function SiswaDashboardLayout({
           <div className="bg-white w-3/4 max-w-sm h-full p-6 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-[#0B38E6] flex items-center justify-center text-[#A1FF00] font-black text-lg">
-                  SL
+                <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 overflow-hidden shrink-0">
+                  <img src="/logo.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
                 </div>
                 <h1 className="font-extrabold text-md text-slate-900">SkillLoom</h1>
               </div>

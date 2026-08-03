@@ -57,6 +57,10 @@ export default function SiswaDashboardLayout({
   const handleLogout = () => {
     // Implement logout logic if needed
     alert("Keluar dari akun siswa...");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("profile");
+    window.location.href = "/";
   };
 
   return (

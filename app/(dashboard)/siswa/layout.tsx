@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Toast, ToastType } from "@/components/ui/Toast";
 import { 
   Briefcase, 
   LayoutDashboard, 
@@ -30,6 +31,15 @@ export default function SiswaDashboardLayout({
 }) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [toast, setToast] = useState<{
+    isOpen: boolean;
+    message: string;
+    type: ToastType;
+  }>({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
 
   const sidebarItems: SidebarItem[] = [
     {
@@ -55,12 +65,17 @@ export default function SiswaDashboardLayout({
   ];
 
   const handleLogout = () => {
-    // Implement logout logic if needed
-    alert("Keluar dari akun siswa...");
+    setToast({
+      isOpen: true,
+      message: "Berhasil keluar dari akun siswa...",
+      type: "success",
+    });
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("profile");
-    window.location.href = "/";
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1200);
   };
 
   return (
@@ -259,6 +274,14 @@ export default function SiswaDashboardLayout({
           {children}
         </div>
       </main>
+
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

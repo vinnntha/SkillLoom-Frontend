@@ -54,6 +54,10 @@ export default function WalletPortfolioPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const totalBalance = transactions.reduce((acc, tx) => {
+    return tx.type === "income" && tx.status === "Berhasil" ? acc + tx.amountRaw : acc;
+  }, 0);
+
   // Fetch real data from backend API (GET /transactions/my & GET /showcases)
   useEffect(() => {
     async function loadWalletData() {
@@ -431,7 +435,7 @@ export default function WalletPortfolioPage() {
                     className="w-full text-xs py-3 pl-11 pr-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-bold"
                   />
                 </div>
-                <span className="text-[9px] text-slate-400 block font-semibold">Tersedia untuk ditarik: Rp 3.000.000 (tidak termasuk escrow)</span>
+                <span className="text-[9px] text-slate-400 block font-semibold">Tersedia untuk ditarik: Rp {totalBalance.toLocaleString("id-ID")} (hanya dana yang sudah dirilis)</span>
               </div>
 
               {/* Account details */}
@@ -442,7 +446,7 @@ export default function WalletPortfolioPage() {
                 <input
                   type="text"
                   required
-                  placeholder={withdrawMethod === "bank" ? "BCA - 1234567890 a/n Arya" : "081234567890"}
+                  placeholder={withdrawMethod === "bank" ? "BCA - 1234567890 a/n Pemilik" : "081234567890"}
                   value={withdrawAccount}
                   onChange={(e) => setWithdrawAccount(e.target.value)}
                   className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-semibold"

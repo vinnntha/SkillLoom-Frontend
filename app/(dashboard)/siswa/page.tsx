@@ -565,7 +565,7 @@ export default function EksplorasiProyekPage() {
                   <textarea
                     required
                     rows={4}
-                    placeholder="Contoh: Halo! Saya Arya dari SMKN 4 Bandung, spesialis di bidang web landing page. Saya terbiasa dengan Next.js dan Tailwind. Saya sangat tertarik membantu Kedai Kopi Senja karena..."
+                    placeholder="Contoh: Halo! Saya siswa SMK spesialis di bidang ini. Saya memiliki keterampilan yang sesuai dengan kriteria proyek ini dan berkomitmen menyelesaikan pekerjaan secara profesional..."
                     value={pitchText}
                     onChange={(e) => setPitchText(e.target.value)}
                     className="w-full text-xs p-3.5 text-slate-850 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-[#0B38E6] focus:bg-white transition-all resize-none placeholder-slate-400 leading-relaxed"

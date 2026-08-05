@@ -58,6 +58,12 @@ export default function WalletPortfolioPage() {
     return tx.type === "income" && tx.status === "Berhasil" ? acc + tx.amountRaw : acc;
   }, 0);
 
+  const escrowBalance = transactions.reduce((acc, tx) => {
+    return tx.type === "escrow" || tx.status === "Escrow" ? acc + tx.amountRaw : acc;
+  }, 0);
+
+  const totalEarnings = totalBalance + escrowBalance;
+
   // Fetch real data from backend API (GET /transactions/my & GET /showcases)
   useEffect(() => {
     async function loadWalletData() {
@@ -181,9 +187,14 @@ export default function WalletPortfolioPage() {
             <span className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wider">Total Pendapatan (Stipend)</span>
           </div>
           <div className="space-y-1">
-            <h2 className="text-4xl md:text-5xl font-black text-[#A1FF00] tracking-tight">Rp 3.750.000</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-[#A1FF00] tracking-tight">
+              {isLoading ? "..." : `Rp ${totalEarnings.toLocaleString("id-ID")}`}
+            </h2>
             <p className="text-xs text-slate-200 font-semibold tracking-wide">
-              Saldo Escrow Ditahan (Aktif): <span className="text-amber-300 font-extrabold">Rp 750.000</span>
+              Saldo Escrow Ditahan (Aktif):{" "}
+              <span className="text-amber-300 font-extrabold">
+                {isLoading ? "..." : `Rp ${escrowBalance.toLocaleString("id-ID")}`}
+              </span>
             </p>
           </div>
         </div>

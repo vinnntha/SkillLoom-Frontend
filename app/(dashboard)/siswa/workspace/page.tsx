@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -20,6 +20,8 @@ import {
   FileCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface Message {
   id: string;
@@ -32,46 +34,82 @@ interface Message {
 }
 
 export default function WorkspaceDetailPage() {
+  const { user } = useAuth();
+
   // Submission Form State
   const [submissionLink, setSubmissionLink] = useState("");
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
+  // Applications from API
+  const [applications, setApplications] = useState<any[]>([]);
+  const [isLoadingApps, setIsLoadingApps] = useState(true);
+
   // Stepper State
   const [currentStep, setCurrentStep] = useState(2); // 1: Diterima, 2: Pengerjaan, 3: Review UMKM, 4: Selesai & Dibayar
 
   // Chat State
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "msg-1",
-      sender: "UMKM",
-      senderName: "Budi (Kedai Kopi Senja)",
-      avatar: "KS",
-      avatarBg: "bg-amber-100 text-amber-800",
-      content: "Halo Arya, terima kasih sudah menerima proyek ini. Untuk warna utama mohon diselaraskan dengan warna brand kami ya (nuansa warm coklat & krem). Aset gambar kopi beresolusi tinggi sudah saya lampirkan di file brief.",
-      timestamp: "Kemarin, 14:20"
-    },
-    {
-      id: "msg-2",
-      sender: "Guru",
-      senderName: "Bu Endah (Pembimbing)",
-      avatar: "BE",
-      avatarBg: "bg-indigo-100 text-indigo-800",
-      content: "Arya, pastikan kode Next.js kamu clean dan strukturnya rapi sesuai standar industri yang dipelajari di kelas. Jangan lupa lakukan kompresi gambar agar performa landing page optimal.",
-      timestamp: "Kemarin, 16:45"
-    },
-    {
-      id: "msg-3",
-      sender: "Siswa",
-      senderName: "Arya Maulana (Anda)",
-      avatar: "AM",
-      avatarBg: "bg-[#0B38E6] text-white",
-      content: "Baik Pak Budi & Bu Endah, saya sedang mengimplementasikan desain di Tailwind CSS. Optimasi gambar akan saya prioritaskan menggunakan komponen next/image.",
-      timestamp: "Hari ini, 09:15"
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+
+  // Load applications from API (GET /applications/my-applications) and map dynamic chat messages
+  useEffect(() => {
+    async function loadMyApplications() {
+      setIsLoadingApps(true);
+      try {
+        const data = await api.applications.getMyApplications();
+        if (Array.isArray(data) && data.length > 0) {
+          setApplications(data);
+          const active = data[0];
+          
+          const dynamicMsgs: Message[] = [];
+          if (active.project?.description) {
+            dynamicMsgs.push({
+              id: `msg-project-${active.project.id || "1"}`,
+              sender: "UMKM",
+              senderName: `${active.project.umkm?.companyName || "UMKM Partner"}`,
+              avatar: (active.project.umkm?.companyName || "U").substring(0, 2).toUpperCase(),
+              avatarBg: "bg-amber-100 text-amber-800",
+              content: `Halo! Instruksi proyek "${active.project.title}": ${active.project.description}`,
+              timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+            });
+          }
+
+          if (active.pitchMessage) {
+            dynamicMsgs.push({
+              id: `msg-pitch-${active.id}`,
+              sender: "Siswa",
+              senderName: `${user?.name || "Anda"} (Siswa)`,
+              avatar: (user?.name || "S").substring(0, 2).toUpperCase(),
+              avatarBg: "bg-[#0B38E6] text-white",
+              content: `Pesan Lamaran Saya: "${active.pitchMessage}"`,
+              timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+            });
+          }
+
+          setMessages(dynamicMsgs);
+
+          // Update current step based on backend status
+          if (active.status === "ACCEPTED") {
+            setCurrentStep(2);
+          } else if (active.status === "PENDING") {
+            setCurrentStep(1);
+          }
+        } else {
+          setApplications([]);
+          setMessages([]);
+        }
+      } catch (err) {
+        console.warn("Failed to load applications from API:", err);
+        setApplications([]);
+        setMessages([]);
+      } finally {
+        setIsLoadingApps(false);
+      }
+    }
+    loadMyApplications();
+  }, [user]);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -119,8 +157,8 @@ export default function WorkspaceDetailPage() {
       const botMessage: Message = {
         id: `msg-submit-${Date.now()}`,
         sender: "Siswa",
-        senderName: "Arya Maulana (Anda)",
-        avatar: "AM",
+        senderName: `${user?.name || "Anda"} (Anda)`,
+        avatar: (user?.name || "S").substring(0, 2).toUpperCase(),
         avatarBg: "bg-[#0B38E6] text-white",
         content: `Sistem: Hasil karya telah dikirimkan. Tautan: ${submissionLink}. Jumlah berkas terlampir: ${attachedFiles.length}`,
         timestamp: "Baru saja"
@@ -141,8 +179,8 @@ export default function WorkspaceDetailPage() {
     const msg: Message = {
       id: `msg-${Date.now()}`,
       sender: "Siswa",
-      senderName: "Arya Maulana (Anda)",
-      avatar: "AM",
+      senderName: `${user?.name || "Anda"} (Anda)`,
+      avatar: (user?.name || "S").substring(0, 2).toUpperCase(),
       avatarBg: "bg-[#0B38E6] text-white",
       content: newMessage.trim(),
       timestamp: "Baru saja"
@@ -151,20 +189,53 @@ export default function WorkspaceDetailPage() {
     setMessages(prev => [...prev, msg]);
     setNewMessage("");
 
-    // Optional: Simulate automated prompt from UMKM for interactive feel
+    // Automated prompt from UMKM for interactive response
     setTimeout(() => {
       const reply: Message = {
         id: `msg-reply-${Date.now()}`,
         sender: "UMKM",
-        senderName: "Budi (Kedai Kopi Senja)",
-        avatar: "KS",
+        senderName: `${umkmName} (UMKM)`,
+        avatar: (umkmName || "U").substring(0, 2).toUpperCase(),
         avatarBg: "bg-amber-100 text-amber-800",
-        content: "Terima kasih atas update-nya, Arya! Saya akan segera meninjau progressnya.",
+        content: `Terima kasih atas update-nya! Kami telah menerima pesan mengenai proyek "${projectTitle}".`,
         timestamp: "Baru saja"
       };
       setMessages(prev => [...prev, reply]);
     }, 2000);
   };
+
+  // Extract active application from API
+  const activeApp = applications.length > 0 ? applications[0] : null;
+  const projectTitle = activeApp?.project?.title || "Proyek Vokasi";
+  const umkmName = activeApp?.project?.umkm?.companyName || "UMKM Partner";
+  const projectBudget = activeApp?.project?.budget 
+    ? `Rp ${Number(activeApp.project.budget).toLocaleString("id-ID")}` 
+    : "Rp 0";
+  const projectDescription = activeApp?.project?.description || 
+    "Belum ada deskripsi instruksi proyek.";
+  const appStatus = activeApp?.status || "PENDING";
+
+  if (isLoadingApps) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center text-slate-500 font-medium border border-slate-100 shadow-sm">
+        Memuat data workspace dari backend http://10.132.27.105:3001...
+      </div>
+    );
+  }
+
+  if (applications.length === 0) {
+    return (
+      <div className="bg-white rounded-3xl p-12 text-center space-y-4 border border-slate-100 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-800">Belum Ada Proyek Aktif</h3>
+        <p className="text-xs text-slate-500 max-w-md mx-auto">
+          Anda belum melamar atau memiliki proyek berjalan di backend. Silakan jelajahi daftar proyek pada menu Cari Proyek untuk mulai berkolaborasi.
+        </p>
+        <Link href="/siswa" className="inline-block bg-[#0B38E6] text-white px-5 py-2.5 rounded-full text-xs font-bold shadow-md hover:bg-blue-700 transition-colors">
+          Cari Proyek Sekarang
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -204,19 +275,21 @@ export default function WorkspaceDetailPage() {
           </Link>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-              Pembuatan Landing Page Menu Kopi
+              {projectTitle}
             </h1>
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-              currentStep === 2 
-                ? "bg-[#A1FF00] text-slate-900 animate-pulse" 
+              appStatus === "ACCEPTED"
+                ? "bg-[#A1FF00] text-slate-900" 
+                : appStatus === "REJECTED"
+                ? "bg-rose-100 text-rose-800"
                 : "bg-amber-100 text-amber-800"
             }`}>
-              {currentStep === 2 ? "In Progress" : "Dalam Review"}
+              {appStatus === "ACCEPTED" ? "DITERIMA (IN PROGRESS)" : appStatus === "REJECTED" ? "DITOLAK" : "MENUNGGU (PENDING)"}
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-400 font-semibold">
             <Building2 className="h-4 w-4 text-slate-400" />
-            <span>Kedai Kopi Senja</span>
+            <span>{umkmName}</span>
             <span>•</span>
             <Clock className="h-4 w-4 text-slate-400" />
             <span>Batas Waktu: 5 Hari Lagi</span>
@@ -226,7 +299,7 @@ export default function WorkspaceDetailPage() {
         <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100 shrink-0 self-start md:self-auto">
           <div>
             <span className="text-[9px] font-bold text-slate-400 uppercase block tracking-wider">Nilai Proyek</span>
-            <span className="text-[#0B38E6] font-black text-base">Rp 750.000</span>
+            <span className="text-[#0B38E6] font-black text-base">{projectBudget}</span>
           </div>
         </div>
       </div>
@@ -249,9 +322,7 @@ export default function WorkspaceDetailPage() {
 
             {/* Markdown-style content */}
             <div className="prose prose-slate max-w-none text-xs text-slate-655 space-y-4 leading-relaxed">
-              <p>
-                Kedai Kopi Senja sedang mengembangkan menu kopi artisan baru. Kami mencari siswa vokasi jurusan Rekayasa Perangkat Lunak untuk membuat landing page promo satu halaman yang interaktif, responsif, dan teroptimasi SEO.
-              </p>
+              <p>{projectDescription}</p>
               
               <h4 className="font-bold text-slate-900 text-sm mt-4">📋 Target Output Halaman:</h4>
               <ul className="list-disc list-inside space-y-1.5 pl-2">
@@ -449,7 +520,9 @@ export default function WorkspaceDetailPage() {
                 </div>
                 <div className="space-y-0.5">
                   <h4 className="text-xs font-bold text-slate-800">Proyek Diterima</h4>
-                  <span className="text-[10px] text-slate-400 block font-semibold">25 Juli 2026 - Disetujui Guru</span>
+                  <span className="text-[10px] text-slate-400 block font-semibold">
+                    {activeApp?.createdAt ? `${new Date(activeApp.createdAt).toLocaleDateString("id-ID")} - Disetujui` : "Terverifikasi"}
+                  </span>
                 </div>
               </div>
 
@@ -471,7 +544,9 @@ export default function WorkspaceDetailPage() {
                 </div>
                 <div className="space-y-0.5">
                   <h4 className={`text-xs font-bold ${currentStep === 2 ? "text-[#0B38E6]" : "text-slate-800"}`}>Pengerjaan Proyek</h4>
-                  <span className="text-[10px] text-slate-400 block font-semibold">Arya Maulana (RPL)</span>
+                  <span className="text-[10px] text-slate-400 block font-semibold">
+                    {user?.name || user?.siswaProfile?.fullName || "Siswa SkillLoom"} {user?.siswaProfile?.jurusan ? `(${user.siswaProfile.jurusan})` : ""}
+                  </span>
                 </div>
               </div>
 

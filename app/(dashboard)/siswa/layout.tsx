@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Toast, ToastType } from "@/components/ui/Toast";
+import { useAuth } from "@/context/AuthContext";
 import { 
   Briefcase, 
   LayoutDashboard, 
@@ -30,6 +31,8 @@ export default function SiswaDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, token, isLoading, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toast, setToast] = useState<{
     isOpen: boolean;
@@ -40,6 +43,28 @@ export default function SiswaDashboardLayout({
     message: "",
     type: "success",
   });
+
+  // Client-side Token Guard: Redirect unauthenticated users
+  React.useEffect(() => {
+    if (!isLoading && (!token || !user)) {
+      router.replace("/?auth=login");
+    }
+  }, [isLoading, token, user, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F4F6F9] flex flex-col items-center justify-center p-6 space-y-4">
+        <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center p-2 shadow-lg animate-bounce">
+          <img src="/logo1.png" alt="SkillLoom" className="h-full w-auto object-contain" />
+        </div>
+        <p className="text-xs font-bold text-slate-500 tracking-wide uppercase">Memeriksa Akses Sesi Autentikasi...</p>
+      </div>
+    );
+  }
+
+  if (!token || !user) {
+    return null;
+  }
 
   const sidebarItems: SidebarItem[] = [
     {
@@ -70,13 +95,15 @@ export default function SiswaDashboardLayout({
       message: "Berhasil keluar dari akun siswa...",
       type: "success",
     });
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("profile");
+    logout();
     setTimeout(() => {
       window.location.href = "/";
     }, 1200);
   };
+
+  const displayName = user?.name || user?.siswaProfile?.fullName || "Siswa SkillLoom";
+  const displaySub = user?.siswaProfile?.jurusan ? `Jurusan ${user.siswaProfile.jurusan}` : user?.email || "Siswa SMK";
+  const initials = displayName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "SW";
 
   return (
     <div className="min-h-screen bg-[#F4F6F9] text-slate-800 flex flex-col md:flex-row relative">
@@ -97,15 +124,15 @@ export default function SiswaDashboardLayout({
         <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
           <div className="relative">
             <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
-              AM
+              {initials}
             </div>
             <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-[#A1FF00] rounded-full border-2 border-white flex items-center justify-center" title="Verified Account">
               <Award className="h-2 w-2 text-slate-900" />
             </div>
           </div>
           <div className="overflow-hidden">
-            <h4 className="font-bold text-sm text-slate-800 truncate">Arya Maulana</h4>
-            <p className="text-xs text-slate-500 truncate">RPL - SMK Negeri 4</p>
+            <h4 className="font-bold text-sm text-slate-800 truncate">{displayName}</h4>
+            <p className="text-xs text-slate-500 truncate">{displaySub}</p>
           </div>
         </div>
 
@@ -190,10 +217,10 @@ export default function SiswaDashboardLayout({
             {/* Profile Section for Mobile */}
             <div className="mb-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
-                AM
+                {initials}
               </div>
               <div>
-                <h4 className="font-bold text-sm text-slate-800">Arya Maulana</h4>
+                <h4 className="font-bold text-sm text-slate-800">{displayName}</h4>
                 <p className="text-xs text-slate-500">RPL - SMK Negeri 4</p>
               </div>
             </div>
@@ -259,11 +286,13 @@ export default function SiswaDashboardLayout({
             {/* User Profile */}
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <span className="block text-xs font-bold text-slate-800">Arya Maulana</span>
-                <span className="block text-[10px] font-semibold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full inline-block">Score: 98/100</span>
+                <span className="block text-xs font-bold text-slate-800">{displayName}</span>
+                <span className="block text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
+                  {user?.siswaProfile?.jurusan ? `Siswa ${user.siswaProfile.jurusan}` : "Verified Siswa"}
+                </span>
               </div>
               <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-xs shadow-sm">
-                AM
+                {initials}
               </div>
             </div>
           </div>

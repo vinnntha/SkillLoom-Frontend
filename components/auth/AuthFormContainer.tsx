@@ -21,6 +21,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Toast, ToastType } from "@/components/ui/Toast";
+import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 type RoleType = "siswa" | "umkm" | "admin";
 
@@ -34,6 +36,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   setIsSignIn,
 }) => {
   const router = useRouter();
+  const { loginSuccess } = useAuth();
   const [userRole, setUserRole] = useState<RoleType>("siswa");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -81,23 +84,65 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Simulate authentication API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       if (isSignIn) {
-        showToast("Berhasil masuk! Mengalihkan ke dashboard...", "success");
+        // Postman endpoint: POST /auth/login
+        const res = await api.auth.login({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        loginSuccess(res.access_token, res.user);
+        showToast(res.message || "Berhasil masuk! Mengalihkan ke dashboard...", "success");
+
+        const targetRole = (res.user?.role || userRole).toLowerCase();
         setTimeout(() => {
-          router.push(`/${userRole}`);
-        }, 1000);
+          if (targetRole === "siswa") {
+            router.push("/siswa");
+          } else if (targetRole === "umkm") {
+            router.push("/umkm");
+          } else if (targetRole === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/siswa");
+          }
+        }, 800);
       } else {
-        showToast(
-          "Pendaftaran berhasil! Silakan masuk dengan akun Anda.",
-          "success"
-        );
+        // Register endpoints based on selected role:
+        // POST /auth/register/siswa
+        // POST /auth/register/umkm
+        // POST /auth/register/admin
+        if (userRole === "siswa") {
+          const res = await api.auth.registerSiswa({
+            email: formData.email,
+            password: formData.password,
+            fullName: formData.fullName,
+            nisn: formData.nisn,
+            jurusan: formData.jurusan || "RPL",
+          });
+          showToast(res.message || "Pendaftaran Siswa berhasil! Silakan masuk.", "success");
+        } else if (userRole === "umkm") {
+          const res = await api.auth.registerUmkm({
+            email: formData.email,
+            password: formData.password,
+            companyName: formData.businessName,
+            industryType: formData.jenisUsaha || "Kuliner",
+            phoneNumber: formData.phoneNumber,
+          });
+          showToast(res.message || "Pendaftaran UMKM berhasil! Silakan masuk.", "success");
+        } else if (userRole === "admin") {
+          const res = await api.auth.registerAdmin({
+            email: formData.email,
+            password: formData.password,
+            schoolName: formData.schoolName,
+            position: formData.jabatan || "Guru Pembimbing",
+          });
+          showToast(res.message || "Pendaftaran Admin/Guru berhasil! Silakan masuk.", "success");
+        }
+
         setIsSignIn(true);
       }
-    } catch (err) {
-      showToast("Terjadi kesalahan. Silakan coba lagi.", "error");
+    } catch (err: any) {
+      showToast(err.message || "Terjadi kesalahan. Silakan coba lagi.", "error");
     } finally {
       setIsSubmitting(false);
     }

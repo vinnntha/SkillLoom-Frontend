@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   Search as SearchIcon, 
   Filter as FilterIcon, 
@@ -16,6 +16,7 @@ import {
   X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { api } from "@/lib/api";
 
 // Types
 interface Project {
@@ -42,6 +43,10 @@ export default function EksplorasiProyekPage() {
   const [selectedJurusan, setSelectedJurusan] = useState("Semua");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
 
+  // State for backend loaded projects
+  const [apiProjects, setApiProjects] = useState<Project[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+
   // State for active modal (Pitch/Lamar)
   const [activePitchProject, setActivePitchProject] = useState<Project | null>(null);
   const [activeDetailProject, setActiveDetailProject] = useState<Project | null>(null);
@@ -56,143 +61,58 @@ export default function EksplorasiProyekPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // Mock data mapping for 6 projects
-  const projects: Project[] = [
-    {
-      id: "proj-1",
-      title: "Pembuatan Landing Page Menu Kopi",
-      umkmName: "Kedai Kopi Senja",
-      timePosted: "2 jam lalu",
-      stipend: "Rp 750.000",
-      stipendRaw: 750000,
-      deadline: "5 Hari",
-      tags: ["Next.js", "Tailwind", "Responsive"],
-      jurusan: "RPL",
-      category: "Web Development",
-      location: "Bandung",
-      logoText: "KKS",
-      logoBg: "bg-amber-100 text-amber-800",
-      description: "Kedai Kopi Senja sedang mengembangkan menu kopi artisan baru. Kami mencari siswa vokasi jurusan Rekayasa Perangkat Lunak untuk membuat landing page promo satu halaman yang interaktif, responsif, dan teroptimasi SEO.",
-      requirements: [
-        "Memahami Next.js & Tailwind CSS",
-        "Mampu menerjemahkan desain Figma ke kode",
-        "Memiliki pemahaman dasar tentang web responsive dan loading time"
-      ]
-    },
-    {
-      id: "proj-2",
-      title: "Desain Feed Instagram Promosi Musiman",
-      umkmName: "Kopi Senja Co.",
-      timePosted: "5 jam lalu",
-      stipend: "Rp 350.000",
-      stipendRaw: 350000,
-      deadline: "3 Hari",
-      tags: ["Figma", "Canva", "Sosial Media"],
-      jurusan: "DKV",
-      category: "Desain Grafis",
-      location: "Jakarta",
-      logoText: "KS",
-      logoBg: "bg-purple-100 text-purple-800",
-      description: "Kami membutuhkan 9 desain feed Instagram bertema musim kemarau dan promo minuman dingin terbaru kami. Pekerjaan mencakup pembuatan template aset visual dan copywriting pendek.",
-      requirements: [
-        "Menguasai Figma atau Adobe Illustrator/Canva",
-        "Memiliki portofolio desain media sosial",
-        "Mampu bekerja dengan guideline visual brand yang sudah ada"
-      ]
-    },
-    {
-      id: "proj-3",
-      title: "Pembuatan Toko Online Roti Artisan",
-      umkmName: "Roti Ibu Baker",
-      timePosted: "1 hari lalu",
-      stipend: "Rp 1.200.000",
-      stipendRaw: 1200000,
-      deadline: "14 Hari",
-      tags: ["React", "Tailwind", "E-Commerce"],
-      jurusan: "RPL",
-      category: "Web Development",
-      location: "Surabaya",
-      logoText: "RIB",
-      logoBg: "bg-emerald-100 text-emerald-800",
-      description: "Membantu toko Roti Ibu Baker meluncurkan katalog online digital mereka. Siswa akan mengimplementasikan shopping cart sederhana berbasis lokal storage dan integrasi chat WhatsApp.",
-      requirements: [
-        "Familiar dengan React.js dan Tailwind CSS",
-        "Memahami state management sederhana (React Hooks)",
-        "Memiliki ketelitian dalam layouting grid produk"
-      ]
-    },
-    {
-      id: "proj-4",
-      title: "Video Reels & TikTok Ads Product",
-      umkmName: "Hijab Chic Style",
-      timePosted: "3 hari lalu",
-      stipend: "Rp 500.000",
-      stipendRaw: 500000,
-      deadline: "7 Hari",
-      tags: ["Video Editing", "CapCut", "TikTok Ads"],
-      jurusan: "DKV",
-      category: "Sosial Media",
-      location: "Bandung",
-      logoText: "HCS",
-      logoBg: "bg-rose-100 text-rose-800",
-      description: "Dibutuhkan video editor kreatif untuk merakit footage mentah produk fashion hijab kami menjadi video iklan reels dan TikTok berdurasi 15-30 detik. Target konversi penjualan tinggi.",
-      requirements: [
-        "Mahir editing video menggunakan CapCut, Premiere, atau Davinci",
-        "Paham tren transisi musik & hook video TikTok",
-        "Mampu menambahkan subtitle/caption dinamis yang menarik"
-      ]
-    },
-    {
-      id: "proj-5",
-      title: "Copywriting & Content Plan Bulan Agustus",
-      umkmName: "Keripik Pedas Maicih",
-      timePosted: "4 hari lalu",
-      stipend: "Rp 400.000",
-      stipendRaw: 400000,
-      deadline: "10 Hari",
-      tags: ["Copywriting", "Content Calendar", "SEO"],
-      jurusan: "Pemasaran Digital",
-      category: "Sosial Media",
-      location: "Yogyakarta",
-      logoText: "KPM",
-      logoBg: "bg-red-100 text-red-800",
-      description: "Kami membutuhkan penyusunan kalender konten media sosial (Instagram & TikTok) selama 1 bulan penuh, termasuk draf copywriting caption, ide video, dan riset hashtag terpopuler.",
-      requirements: [
-        "Jurusan Pemasaran Digital atau memiliki minat menulis",
-        "Memahami riset trend & hashtag",
-        "Mampu menyusun spreadsheet rencana konten secara rapi"
-      ]
-    },
-    {
-      id: "proj-6",
-      title: "Desain Rebranding Logo & Kemasan Sambal",
-      umkmName: "Sambal Nusantara",
-      timePosted: "1 minggu lalu",
-      stipend: "Rp 800.000",
-      stipendRaw: 800000,
-      deadline: "8 Hari",
-      tags: ["Illustrator", "Branding", "Packaging"],
-      jurusan: "DKV",
-      category: "Desain Grafis",
-      location: "Malang",
-      logoText: "SN",
-      logoBg: "bg-orange-100 text-orange-800",
-      description: "Proyek rebranding kemasan botol sambal varian baru. Siswa bertugas merancang sticker label kemasan yang modern, informatif, namun tetap memiliki sentuhan kearifan lokal.",
-      requirements: [
-        "Menguasai Adobe Illustrator atau CorelDraw",
-        "Paham standarisasi ukuran & cetak kemasan produk makanan",
-        "Memiliki kepekaan warna dan layout ilustrasi yang baik"
-      ]
+  // Fetch Projects strictly from backend API (GET /projects)
+  useEffect(() => {
+    async function loadProjects() {
+      setIsLoadingProjects(true);
+      try {
+        const fetched = await api.projects.getAll({
+          category: selectedCategory !== "Semua" ? selectedCategory : undefined,
+          search: searchQuery || undefined,
+        });
+
+        if (Array.isArray(fetched)) {
+          const mapped: Project[] = fetched.map((item: any) => ({
+            id: item.id || item._id,
+            title: item.title,
+            umkmName: item.umkm?.companyName || "UMKM Partner",
+            timePosted: "Baru saja",
+            stipend: `Rp ${Number(item.budget || 0).toLocaleString("id-ID")}`,
+            stipendRaw: Number(item.budget || 0),
+            deadline: item.deadline ? new Date(item.deadline).toLocaleDateString("id-ID") : "7 Hari",
+            tags: [item.category || "General", "Vokasi"],
+            jurusan: item.category || "RPL",
+            category: item.category || "Web Development",
+            location: item.umkm?.address || "Indonesia",
+            logoText: (item.umkm?.companyName || "U").substring(0, 3).toUpperCase(),
+            logoBg: "bg-blue-100 text-blue-800",
+            description: item.description || "Deskripsi proyek.",
+            requirements: ["Siswa Aktif SMK", "Komitmen Selesai Tepat Waktu"],
+          }));
+          setApiProjects(mapped);
+        } else {
+          setApiProjects([]);
+        }
+      } catch (err) {
+        console.warn("Error loading projects from backend API (http://10.132.27.105:3001):", err);
+        setApiProjects([]);
+      } finally {
+        setIsLoadingProjects(false);
+      }
     }
-  ];
+
+    loadProjects();
+  }, [selectedCategory, searchQuery]);
+
+  const projectsToDisplay = apiProjects;
 
   // Unique categories derived from projects
-  const categories = ["Semua", "Web Development", "Desain Grafis", "Sosial Media"];
+  const categories = ["Semua", "Web Development", "Desain Grafis", "Sosial Media", "RPL", "DKV"];
   const jurusans = ["Semua", "RPL", "DKV", "Pemasaran Digital"];
 
   // Filter logic
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return projectsToDisplay.filter((project) => {
       const matchesSearch = 
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.umkmName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,35 +126,42 @@ export default function EksplorasiProyekPage() {
 
       return matchesSearch && matchesJurusan && matchesCategory;
     });
-  }, [searchQuery, selectedJurusan, selectedCategory]);
+  }, [projectsToDisplay, searchQuery, selectedJurusan, selectedCategory]);
 
-  // Handle pitching form submission
-  const handlePitchSubmit = (e: React.FormEvent) => {
+  // Handle pitching form submission (POSTMAN Endpoint: POST /applications)
+  const handlePitchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pitchText || !estimatedDays || !portfolioLink) {
-      alert("Harap isi semua kolom pitching!");
+    if (!pitchText) {
+      alert("Harap isi pesan pitching Anda!");
       return;
     }
+    if (!activePitchProject) return;
 
     setIsSubmitting(true);
 
-    // Simulate network latency
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      // POST /applications
+      await api.applications.apply({
+        projectId: activePitchProject.id,
+        pitchMessage: pitchText,
+      });
+
       setActivePitchProject(null);
       setPitchText("");
       setEstimatedDays("");
       setPortfolioLink("");
-      
-      // Show success toast
-      setToastMessage("Lamaran berhasil dikirim! Silakan pantau status pengerjaan Anda.");
+
+      setToastMessage("Lamaran berhasil dikirim! Silakan pantau status pengerjaan Anda di Workspace.");
       setShowToast(true);
 
-      // Auto-hide toast
       setTimeout(() => {
         setShowToast(false);
       }, 5000);
-    }, 1500);
+    } catch (err: any) {
+      alert(err.message || "Gagal melamar proyek. Silakan pastikan Anda telah login sebagai Siswa.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

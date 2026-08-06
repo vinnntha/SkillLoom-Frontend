@@ -276,7 +276,7 @@ export default function SiswaDashboardLayout({
         <header className="hidden md:flex items-center justify-between px-8 py-5 bg-white border-b border-slate-100 sticky top-0 z-30">
           <div>
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Workspace Utama</span>
-            <h2 className="font-bold text-slate-800 text-sm">Dashboard Pelajar Vokasi</h2>
+            <h2 className="font-bold text-slate-800 text-sm">Dashboard Pelajar</h2>
           </div>
           <div className="flex items-center gap-6">
             {/* Notification Badge */}

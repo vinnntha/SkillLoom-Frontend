@@ -131,19 +131,13 @@ export default function SiswaProfilePage() {
             <div className="h-28 w-28 md:h-36 md:w-36 rounded-full bg-gradient-to-tr from-white/20 to-white/40 border-4 border-white/30 backdrop-blur-md flex items-center justify-center text-white text-3xl md:text-5xl font-black shadow-xl">
               {initials}
             </div>
-            
-            {/* Interactive Circular Stiker Badge "VERIFIED" */}
-            <div className="absolute -bottom-2 -right-2 bg-[#A1FF00] text-slate-950 px-3 py-1 rounded-full border-2 border-[#0B38E6] flex items-center gap-1.5 font-black text-[10px] tracking-wider uppercase shadow-lg animate-pulse">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              <span>VERIFIED SISWA</span>
-            </div>
           </div>
 
           {/* User Display Info & Display Typography Raksasa */}
           <div className="space-y-4 text-center md:text-left flex-1">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-[#A1FF00] text-xs font-bold uppercase tracking-wider">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Profil Talenta Vokasi SMK</span>
+              <span>Profil Talenta SMK</span>
             </div>
 
             <div>
@@ -157,14 +151,14 @@ export default function SiswaProfilePage() {
             </div>
 
             {/* Glassmorphism Floating Stats Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 max-w-lg">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1 max-w-lg">
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center md:text-left">
                 <span className="text-[10px] text-white/70 uppercase font-bold tracking-wider block">NISN</span>
                 <span className="text-sm font-black text-white">{nisn}</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center md:text-left">
                 <span className="text-[10px] text-white/70 uppercase font-bold tracking-wider block">Status Akun</span>
-                <span className="text-sm font-black text-[#A1FF00]">Aktif Vokasi</span>
+                <span className="text-sm font-black text-[#A1FF00]">Aktif</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center md:text-left col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-white/70 uppercase font-bold tracking-wider block">Rating</span>

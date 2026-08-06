@@ -89,6 +89,11 @@ export default function SiswaDashboardLayout({
       href: "/siswa/wallet",
       icon: Wallet,
     },
+    {
+      name: "Profil Saya",
+      href: "/siswa/profile",
+      icon: User,
+    },
   ];
 
   const handleLogout = () => {
@@ -123,7 +128,10 @@ export default function SiswaDashboardLayout({
         </div>
 
         {/* Profile Card Summary */}
-        <div className="mb-8 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
+        <Link 
+          href="/siswa/profile" 
+          className="mb-8 p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-100 flex items-center gap-3 group cursor-pointer"
+        >
           <div className="relative">
             <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
               {initials}
@@ -133,10 +141,10 @@ export default function SiswaDashboardLayout({
             </div>
           </div>
           <div className="overflow-hidden">
-            <h4 className="font-bold text-sm text-slate-800 truncate">{displayName}</h4>
+            <h4 className="font-bold text-sm text-slate-800 group-hover:text-[#0B38E6] transition-colors truncate">{displayName}</h4>
             <p className="text-xs text-slate-500 truncate">{displaySub}</p>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation Menu */}
         <nav className="flex-1 space-y-1">
@@ -285,10 +293,13 @@ export default function SiswaDashboardLayout({
             {/* Divider */}
             <div className="h-6 w-px bg-slate-100"></div>
 
-            {/* User Profile */}
-            <div className="flex items-center gap-3">
+            {/* User Profile Header Link */}
+            <Link 
+              href="/siswa/profile"
+              className="flex items-center gap-3 group hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <div className="text-right">
-                <span className="block text-xs font-bold text-slate-800">{displayName}</span>
+                <span className="block text-xs font-bold text-slate-800 group-hover:text-[#0B38E6] transition-colors">{displayName}</span>
                 <span className="block text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block">
                   {user?.siswaProfile?.jurusan ? `Siswa ${user.siswaProfile.jurusan}` : "Verified Siswa"}
                 </span>
@@ -296,7 +307,7 @@ export default function SiswaDashboardLayout({
               <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-xs shadow-sm">
                 {initials}
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 

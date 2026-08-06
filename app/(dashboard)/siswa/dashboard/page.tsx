@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
   Wallet, 
@@ -16,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 
 export default function SiswaDashboardPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [applicationsList, setApplicationsList] = useState<any[]>([]);
   const [totalBalance, setTotalBalance] = useState(0);
@@ -91,7 +93,10 @@ export default function SiswaDashboardPage() {
           </div>
 
           <div className="relative z-10 mt-8">
-            <button className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 border border-white/10">
+            <button 
+              onClick={() => router.push("/siswa/wallet")}
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-5 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 border border-white/10 cursor-pointer"
+            >
               Tarik Dana
               <ArrowUpRight className="h-4 w-4" />
             </button>

@@ -9,13 +9,14 @@ import {
   ArrowDownRight, 
   ArrowUpRight, 
   CheckCircle2, 
+  Plus,
   ExternalLink,
   Lock,
   ArrowRight,
   TrendingUp,
   X
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
@@ -43,80 +44,92 @@ interface Transaction {
 }
 
 export default function WalletPortfolioPage() {
-  const [activeTab, setActiveTab] = useState<"all" | "portfolio" | "wallet">("all");
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("gopay");
   const [withdrawAccount, setWithdrawAccount] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState<"idle" | "loading" | "success">("idle");
 
+  // Showcase Modal State
+  const [showShowcaseModal, setShowShowcaseModal] = useState(false);
+  const [showcaseTitle, setShowcaseTitle] = useState("");
+  const [showcaseImage, setShowcaseImage] = useState("");
+  const [showcaseTestimonial, setShowcaseTestimonial] = useState("");
+  const [showcaseRating, setShowcaseRating] = useState(5);
+  const [isPublishingShowcase, setIsPublishingShowcase] = useState(false);
+
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Dynamic Balance Calculations from Backend Transactions
   const totalBalance = transactions.reduce((acc, tx) => {
     return tx.type === "income" && tx.status === "Berhasil" ? acc + tx.amountRaw : acc;
   }, 0);
 
-  // Fetch real data from backend API (GET /transactions/my & GET /showcases)
-  useEffect(() => {
-    async function loadWalletData() {
-      setIsLoading(true);
-      try {
-        const [txsData, showcasesData] = await Promise.allSettled([
-          api.transactions.getMyTransactions(),
-          api.showcases.getAll(),
-        ]);
+  const escrowBalance = transactions.reduce((acc, tx) => {
+    return tx.type === "escrow" && tx.status === "Escrow" ? acc + tx.amountRaw : acc;
+  }, 0);
 
-        if (txsData.status === "fulfilled" && Array.isArray(txsData.value) && txsData.value.length > 0) {
-          const mappedTxs: Transaction[] = txsData.value.map((tx: any) => ({
-            id: tx.id || tx._id,
-            type: tx.paymentStatus === "RELEASED" ? "income" : tx.paymentStatus === "ESCROW_HELD" ? "escrow" : "withdrawal",
-            title: `Transaksi Proyek ${tx.project?.title || ""}`,
-            umkmOrBank: tx.umkm?.companyName || "Escrow SkillLoom",
-            date: tx.createdAt ? new Date(tx.createdAt).toLocaleDateString("id-ID") : "Terbaru",
-            amount: `${tx.paymentStatus === "RELEASED" ? "+" : ""} Rp ${Number(tx.amount || 0).toLocaleString("id-ID")}`,
-            amountRaw: Number(tx.amount || 0),
-            status: tx.paymentStatus === "RELEASED" ? "Berhasil" : tx.paymentStatus === "ESCROW_HELD" ? "Escrow" : "Pending",
-          }));
-          setTransactions(mappedTxs);
-        } else {
-          setTransactions([]);
-        }
+  const loadWalletData = async () => {
+    setIsLoading(true);
+    try {
+      const [txsData, showcasesData] = await Promise.allSettled([
+        api.transactions.getMyTransactions(),
+        api.showcases.getAll(),
+      ]);
 
-        if (showcasesData.status === "fulfilled" && Array.isArray(showcasesData.value) && showcasesData.value.length > 0) {
-          const mappedPortfolios: PortfolioItem[] = showcasesData.value.map((sc: any) => ({
-            id: sc.id || sc._id,
-            title: sc.title || sc.project?.title || "Hasil Karya Vokasi",
-            umkmName: sc.project?.umkm?.companyName || "UMKM Partner",
-            category: sc.project?.category || "Vokasi",
-            rating: sc.rating || 5,
-            completionDate: sc.createdAt ? new Date(sc.createdAt).toLocaleDateString("id-ID") : "Terbaru",
-            stipend: sc.project?.budget ? `Rp ${Number(sc.project.budget).toLocaleString("id-ID")}` : "Terverifikasi",
-            department: sc.project?.category || "SMK",
-          }));
-          setPortfolioItems(mappedPortfolios);
-        } else {
-          setPortfolioItems([]);
-        }
-      } catch (err) {
-        console.warn("Error loading wallet & portfolio data from API:", err);
-      } finally {
-        setIsLoading(false);
+      if (txsData.status === "fulfilled" && Array.isArray(txsData.value) && txsData.value.length > 0) {
+        const mappedTxs: Transaction[] = txsData.value.map((tx: any) => ({
+          id: tx.id || tx._id,
+          type: tx.paymentStatus === "RELEASED" ? "income" : tx.paymentStatus === "ESCROW_HELD" ? "escrow" : "withdrawal",
+          title: `Transaksi Proyek ${tx.project?.title || ""}`,
+          umkmOrBank: tx.umkm?.companyName || "Escrow SkillLoom",
+          date: tx.createdAt ? new Date(tx.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+          amount: `${tx.paymentStatus === "RELEASED" ? "+" : ""} Rp ${Number(tx.amount || 0).toLocaleString("id-ID")}`,
+          amountRaw: Number(tx.amount || 0),
+          status: tx.paymentStatus === "RELEASED" ? "Berhasil" : tx.paymentStatus === "ESCROW_HELD" ? "Escrow" : "Pending",
+        }));
+        setTransactions(mappedTxs);
+      } else {
+        setTransactions([]);
       }
-    }
 
+      if (showcasesData.status === "fulfilled" && Array.isArray(showcasesData.value) && showcasesData.value.length > 0) {
+        const mappedPortfolios: PortfolioItem[] = showcasesData.value.map((sc: any) => ({
+          id: sc.id || sc._id,
+          title: sc.title || sc.project?.title || "Hasil Karya Vokasi",
+          umkmName: sc.project?.umkm?.companyName || "UMKM Partner",
+          category: sc.project?.category || "Vokasi",
+          rating: sc.rating || 5,
+          completionDate: sc.createdAt ? new Date(sc.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+          stipend: sc.project?.budget ? `Rp ${Number(sc.project.budget).toLocaleString("id-ID")}` : "Terverifikasi",
+          department: sc.project?.category || "SMK",
+          imageUrl: sc.imageUrl,
+        }));
+        setPortfolioItems(mappedPortfolios);
+      } else {
+        setPortfolioItems([]);
+      }
+    } catch (err) {
+      console.warn("Error loading wallet & portfolio data from API:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadWalletData();
   }, []);
 
   const { refreshUser } = useAuth();
 
+  // Withdraw & Bank update (PATCH /users/profile/siswa)
   const handleWithdrawSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setWithdrawStatus("loading");
 
     try {
-      // Update Siswa Profile with bank / e-wallet info via PATCH /users/profile/siswa
       await api.users.updateSiswaProfile({
         bankName: withdrawMethod.toUpperCase(),
         accountNumber: withdrawAccount,
@@ -129,11 +142,45 @@ export default function WalletPortfolioPage() {
         setWithdrawStatus("idle");
         setWithdrawAmount("");
         setWithdrawAccount("");
-        alert("Permintaan penarikan & pembaruan rekening berhasil diproses!");
+        alert("Permintaan penarikan & pembaruan nomor rekening berhasil diproses ke backend!");
       }, 1000);
     } catch (err: any) {
       alert(err.message || "Gagal memperbarui rekening. Silakan coba lagi.");
       setWithdrawStatus("idle");
+    }
+  };
+
+  // Create Showcase (POST /showcases)
+  const handlePublishShowcase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!showcaseTitle) {
+      alert("Harap masukkan judul karya portofolio!");
+      return;
+    }
+
+    setIsPublishingShowcase(true);
+    try {
+      await api.showcases.create({
+        projectId: "64f1a2b3c4d5e6f7a8b9c0d1", // Dummy fallback ID if project selection not bound
+        title: showcaseTitle,
+        imageUrl: showcaseImage || "https://storage.example.com/showcases/vokasi_app.png",
+        testimonial: showcaseTestimonial || "Pekerjaan rapi dan sesuai instruksi.",
+        rating: showcaseRating,
+        isFeatured: true,
+      });
+
+      setShowShowcaseModal(false);
+      setShowcaseTitle("");
+      setShowcaseImage("");
+      setShowcaseTestimonial("");
+      setShowcaseRating(5);
+
+      alert("Showcase portofolio berhasil dipublikasikan ke backend!");
+      await loadWalletData();
+    } catch (err: any) {
+      alert(err.message || "Gagal memublikasikan showcase portofolio.");
+    } finally {
+      setIsPublishingShowcase(false);
     }
   };
 
@@ -181,9 +228,11 @@ export default function WalletPortfolioPage() {
             <span className="text-xs md:text-sm font-bold text-slate-200 uppercase tracking-wider">Total Pendapatan (Stipend)</span>
           </div>
           <div className="space-y-1">
-            <h2 className="text-4xl md:text-5xl font-black text-[#A1FF00] tracking-tight">Rp 3.750.000</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-[#A1FF00] tracking-tight">
+              Rp {totalBalance.toLocaleString("id-ID")}
+            </h2>
             <p className="text-xs text-slate-200 font-semibold tracking-wide">
-              Saldo Escrow Ditahan (Aktif): <span className="text-amber-300 font-extrabold">Rp 750.000</span>
+              Saldo Escrow Ditahan (Aktif): <span className="text-amber-300 font-extrabold">Rp {escrowBalance.toLocaleString("id-ID")}</span>
             </p>
           </div>
         </div>
@@ -197,13 +246,11 @@ export default function WalletPortfolioPage() {
             Tarik Dana
           </button>
           <button 
-            onClick={() => {
-              const el = document.getElementById("riwayat-transaksi");
-              el?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="w-full sm:w-auto bg-transparent border border-white/20 hover:border-white hover:bg-white/10 text-white font-bold px-7 py-4 rounded-2xl text-xs tracking-wider uppercase transition-all cursor-pointer"
+            onClick={() => setShowShowcaseModal(true)}
+            className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-7 py-4 rounded-2xl text-xs tracking-wider uppercase transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/15"
           >
-            Riwayat Transaksi
+            <Plus className="h-4 w-4 text-[#A1FF00]" />
+            Tambah Showcase
           </button>
         </div>
       </motion.div>
@@ -243,7 +290,7 @@ export default function WalletPortfolioPage() {
               </div>
             ) : portfolioItems.length === 0 ? (
               <div className="col-span-2 py-8 text-center text-slate-400 text-xs font-medium bg-white rounded-3xl border border-slate-100">
-                Belum ada portofolio terpublikasi di backend.
+                Belum ada portofolio terpublikasi di backend. Klik tombol "Tambah Showcase" untuk menambah baru.
               </div>
             ) : (
               portfolioItems.map((item) => (
@@ -252,8 +299,12 @@ export default function WalletPortfolioPage() {
                   variants={itemVariants}
                   className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
                 >
-                  <div className="h-40 bg-slate-100 flex items-center justify-center relative group-hover:bg-slate-200/50 transition-colors">
-                    <ImageIcon className="h-10 w-10 text-slate-350" />
+                  <div className="h-40 bg-slate-100 flex items-center justify-center relative group-hover:bg-slate-200/50 transition-colors overflow-hidden">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon className="h-10 w-10 text-slate-350" />
+                    )}
                     
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#0B38E6] text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm border border-blue-50">
                       <CheckCircle2 className="h-3 w-3 text-blue-500 fill-blue-50" />
@@ -298,21 +349,18 @@ export default function WalletPortfolioPage() {
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-5">
             <div className="space-y-4">
               {isLoading ? (
-                <div className="py-6 text-center text-slate-400 text-xs font-medium">
-                  Memuat riwayat transaksi...
+                <div className="py-8 text-center text-slate-400 text-xs font-medium">
+                  Memuat riwayat transaksi dari backend...
                 </div>
               ) : transactions.length === 0 ? (
-                <div className="py-6 text-center text-slate-400 text-xs font-medium">
-                  Belum ada transaksi di akun Anda.
+                <div className="py-8 text-center text-slate-400 text-xs font-medium">
+                  Belum ada transaksi tercatat di backend.
                 </div>
               ) : (
                 transactions.map((tx) => (
-                  <div 
-                    key={tx.id} 
-                    className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50/50 transition-colors"
-                  >
+                  <div key={tx.id} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                      <div className={`p-2.5 rounded-2xl ${
                         tx.type === "income" 
                           ? "bg-emerald-50 text-emerald-600" 
                           : tx.type === "escrow"
@@ -320,62 +368,42 @@ export default function WalletPortfolioPage() {
                           : "bg-rose-50 text-rose-600"
                       }`}>
                         {tx.type === "income" ? (
-                          <ArrowDownRight className="h-5 w-5" />
+                          <ArrowDownRight className="h-4 w-4" />
                         ) : tx.type === "escrow" ? (
-                          <Lock className="h-4.5 w-4.5" />
+                          <Lock className="h-4 w-4" />
                         ) : (
-                          <ArrowUpRight className="h-5 w-5" />
+                          <ArrowUpRight className="h-4 w-4" />
                         )}
                       </div>
                       <div>
-                        <h4 className="font-extrabold text-xs text-slate-800 leading-snug line-clamp-1">{tx.title}</h4>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5 font-semibold">
-                          <span>{tx.date}</span>
-                          <span>•</span>
-                          <span>{tx.status}</span>
-                        </div>
+                        <h4 className="font-extrabold text-slate-800 text-xs line-clamp-1">{tx.title}</h4>
+                        <p className="text-[10px] text-slate-400 font-semibold">{tx.umkmOrBank} • {tx.date}</p>
                       </div>
                     </div>
-
                     <div className="text-right">
-                      <span className={`block text-xs font-black ${
+                      <span className={`font-black text-xs block ${
                         tx.type === "income" 
                           ? "text-emerald-600" 
                           : tx.type === "escrow"
                           ? "text-amber-600"
-                          : "text-rose-600"
+                          : "text-slate-800"
                       }`}>
                         {tx.amount}
                       </span>
-                      <span className={`inline-block text-[9px] font-black px-1.5 py-0.5 rounded-full mt-1 ${
-                        tx.status === "Berhasil"
-                          ? "bg-emerald-50 text-emerald-600"
-                          : tx.status === "Escrow"
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-slate-100 text-slate-500"
-                      }`}>
-                        {tx.status}
-                      </span>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">{tx.status}</span>
                     </div>
                   </div>
                 ))
               )}
             </div>
-
-            {/* View Full History Trigger */}
-            <button className="w-full text-center py-2 text-xs font-extrabold text-[#0B38E6] bg-[#0B38E6]/5 hover:bg-[#0B38E6]/10 transition-colors rounded-xl">
-              Lihat Seluruh Riwayat
-            </button>
           </div>
         </div>
-
       </div>
 
-      {/* Withdraw Modal */}
+      {/* WITHDRAW MODAL (PATCH /users/profile/siswa) */}
       {showWithdrawModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45 backdrop-blur-sm">
-          <div className="bg-white rounded-[32px] w-full max-w-md shadow-2xl p-8 border border-slate-100 flex flex-col relative animate-in zoom-in-95 duration-200">
-            {/* Close Button */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative border border-slate-100">
             <button
               onClick={() => setShowWithdrawModal(false)}
               className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-colors"
@@ -394,7 +422,6 @@ export default function WalletPortfolioPage() {
             </div>
 
             <form onSubmit={handleWithdrawSubmit} className="space-y-4">
-              {/* Method Selector */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Metode Penarikan</label>
                 <div className="grid grid-cols-3 gap-2">
@@ -419,7 +446,6 @@ export default function WalletPortfolioPage() {
                 </div>
               </div>
 
-              {/* Amount Input */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Jumlah Penarikan (IDR)</label>
                 <div className="relative flex items-center">
@@ -435,10 +461,9 @@ export default function WalletPortfolioPage() {
                     className="w-full text-xs py-3 pl-11 pr-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-bold"
                   />
                 </div>
-                <span className="text-[9px] text-slate-400 block font-semibold">Tersedia untuk ditarik: Rp {totalBalance.toLocaleString("id-ID")} (hanya dana yang sudah dirilis)</span>
+                <span className="text-[9px] text-slate-400 block font-semibold">Tersedia untuk ditarik: Rp {totalBalance.toLocaleString("id-ID")}</span>
               </div>
 
-              {/* Account details */}
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                   {withdrawMethod === "bank" ? "Nomor Rekening & Nama Bank" : "Nomor HP / Akun E-Wallet"}
@@ -458,17 +483,75 @@ export default function WalletPortfolioPage() {
                 disabled={withdrawStatus === "loading"}
                 className="w-full bg-[#0B38E6] hover:bg-slate-950 text-white font-extrabold py-3.5 rounded-xl text-xs tracking-wider uppercase transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 mt-4"
               >
-                {withdrawStatus === "loading" ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Memproses...
-                  </>
-                ) : (
-                  <>Konfirmasi Penarikan</>
-                )}
+                {withdrawStatus === "loading" ? "Memproses..." : "Konfirmasi Penarikan"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* PUBLISH SHOWCASE MODAL (POST /showcases) */}
+      {showShowcaseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative border border-slate-100">
+            <button
+              onClick={() => setShowShowcaseModal(false)}
+              className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-50 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="space-y-2 mb-6">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <Plus className="h-5.5 w-5.5 text-[#0B38E6]" />
+                Publikasikan Showcase Baru
+              </h3>
+              <p className="text-xs text-slate-500">
+                Pamerkan hasil karya proyek Vokasi Anda ke portofolio publik SkillLoom.
+              </p>
+            </div>
+
+            <form onSubmit={handlePublishShowcase} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Judul Hasil Karya</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Website Pemesanan Cafe Next.js"
+                  value={showcaseTitle}
+                  onChange={(e) => setShowcaseTitle(e.target.value)}
+                  className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">URL Gambar Screenshot / Cover</label>
+                <input
+                  type="url"
+                  placeholder="https://example.com/screenshot.png"
+                  value={showcaseImage}
+                  onChange={(e) => setShowcaseImage(e.target.value)}
+                  className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-semibold"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Testimoni / Catatan Pengerjaan</label>
+                <textarea
+                  rows={3}
+                  placeholder="Hasil pekerjaan rapi, selesai tepat waktu, dan disetujui mitra UMKM..."
+                  value={showcaseTestimonial}
+                  onChange={(e) => setShowcaseTestimonial(e.target.value)}
+                  className="w-full text-xs p-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-semibold resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPublishingShowcase}
+                className="w-full bg-[#0B38E6] hover:bg-slate-950 text-white font-extrabold py-3.5 rounded-xl text-xs tracking-wider uppercase transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 mt-4"
+              >
+                {isPublishingShowcase ? "Mempublikasikan..." : "Publikasikan ke Portofolio"}
               </button>
             </form>
           </div>

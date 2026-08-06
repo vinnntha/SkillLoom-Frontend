@@ -182,6 +182,13 @@ export const api = {
       }),
 
     getMyProjects: () => request<any[]>("/projects/my"),
+
+    getPending: () => request<any[]>("/projects/pending"),
+
+    approve: (id: string) =>
+      request<any>(`/projects/${id}/approve`, {
+        method: "PATCH",
+      }),
   },
 
   // ==========================================
@@ -226,6 +233,17 @@ export const api = {
         body: JSON.stringify(payload),
       }),
 
+    hold: (id: string, payload: { paymentStatus: string; paymentProof?: string }) =>
+      request<any>(`/transactions/${id}/hold`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+
+    release: (id: string) =>
+      request<any>(`/transactions/${id}/release`, {
+        method: "PATCH",
+      }),
+
     getMyTransactions: () => request<any[]>("/transactions/my"),
   },
 
@@ -233,6 +251,19 @@ export const api = {
   // SHOWCASES ENDPOINTS
   // ==========================================
   showcases: {
+    create: (payload: {
+      projectId: string;
+      title: string;
+      imageUrl: string;
+      testimonial: string;
+      rating: number;
+      isFeatured?: boolean;
+    }) =>
+      request<any>("/showcases", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
     getAll: (featured?: boolean) =>
       request<any[]>(`/showcases${featured ? "?featured=true" : ""}`),
 

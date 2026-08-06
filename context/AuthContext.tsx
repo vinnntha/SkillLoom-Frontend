@@ -57,20 +57,23 @@ function getSavedUser(): any {
 }
 
 function normalizeUser(userRaw: any): User | null {
-  if (!userRaw) return null;
-
-  const roleNormalized = (userRaw.role || "siswa").toLowerCase() as RoleType;
-  let name = userRaw.email?.split("@")[0] || "User";
-
-  if (userRaw.siswaProfile?.fullName) {
-    name = userRaw.siswaProfile.fullName;
-  } else if (userRaw.umkmProfile?.companyName) {
-    name = userRaw.umkmProfile.companyName;
-  } else if (userRaw.adminProfile?.schoolName) {
-    name = userRaw.adminProfile.schoolName;
-  } else if (userRaw.fullName) {
-    name = userRaw.fullName;
+  if (
+    !userRaw ||
+    (!userRaw.id && !userRaw._id && !userRaw.sub) ||
+    !userRaw.email ||
+    !userRaw.role
+  ) {
+    return null;
   }
+
+  const roleNormalized = userRaw.role.toString().toLowerCase() as RoleType;
+  const name =
+    userRaw.siswaProfile?.fullName ||
+    userRaw.umkmProfile?.companyName ||
+    userRaw.adminProfile?.schoolName ||
+    userRaw.fullName ||
+    userRaw.name ||
+    userRaw.email.split("@")[0];
 
   return {
     id: userRaw.id || userRaw._id || userRaw.sub || "",
@@ -103,27 +106,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const res = await api.users.getMe();
       const userObj = res.user || res;
-      // Merge cached profile details if me endpoint returns token payload
-      const mergedUserObj = {
-        ...cachedUser,
-        ...userObj,
-        siswaProfile: userObj.siswaProfile || cachedUser?.siswaProfile || null,
-        umkmProfile: userObj.umkmProfile || cachedUser?.umkmProfile || null,
-        adminProfile: userObj.adminProfile || cachedUser?.adminProfile || null,
-      };
+
+      if (!userObj || (!userObj.id && !userObj._id && !userObj.email)) {
+        throw new Error("User profile not found in database");
+      }
+
+      // Only merge cached profile details if cachedUser belongs to the SAME user ID/email
+      const isSameUser =
+        cachedUser &&
+        (cachedUser.id === (userObj.id || userObj._id) ||
+          cachedUser.email === userObj.email);
+
+      const mergedUserObj = isSameUser
+        ? {
+          ...cachedUser,
+          ...userObj,
+          siswaProfile: userObj.siswaProfile || cachedUser?.siswaProfile || null,
+          umkmProfile: userObj.umkmProfile || cachedUser?.umkmProfile || null,
+          adminProfile: userObj.adminProfile || cachedUser?.adminProfile || null,
+        }
+        : userObj;
 
       const normUser = normalizeUser(mergedUserObj);
+      if (!normUser) {
+        throw new Error("Invalid user profile");
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user", JSON.stringify(mergedUserObj));
+      }
+
       setUser(normUser);
     } catch (err) {
-      console.warn("Could not fetch current user profile from server:", err);
-      // Fallback to cached user if token exists
-      if (cachedUser) {
-        setUser(normalizeUser(cachedUser));
-      } else {
-        removeToken();
-        setTokenState(null);
-        setUser(null);
+      console.warn("User profile could not be verified with server:", err);
+      // Clear invalid/unregistered token and session
+      removeToken();
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
       }
+      setTokenState(null);
+      setUser(null);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -145,6 +169,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     removeToken();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    }
     setTokenState(null);
     setUser(null);
   };

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -36,6 +36,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   setIsSignIn,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { loginSuccess } = useAuth();
   const [userRole, setUserRole] = useState<RoleType>("siswa");
   const [showPassword, setShowPassword] = useState(false);
@@ -57,6 +58,15 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   const showToast = (message: string, type: ToastType = "success") => {
     setToast({ isOpen: true, message, type });
   };
+
+  React.useEffect(() => {
+    if (!searchParams) return;
+    const errParam = searchParams.get("error");
+    if (errParam === "unregistered") {
+      showToast("Email akun Anda belum terdaftar. Silakan lakukan pendaftaran (Daftar / Sign Up) terlebih dahulu.", "error");
+      setIsSignIn(false);
+    }
+  }, [searchParams, setIsSignIn]);
 
   const userRoleRef = React.useRef(userRole);
   const isGsiInitializedRef = React.useRef(false);
@@ -86,11 +96,8 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
     try {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
-      const stateParam = encodeURIComponent(JSON.stringify({ role: userRole.toUpperCase() }));
-      const googleOAuthUrl = `${baseUrl}/auth/google?state=${stateParam}`;
-
       // Redirect directly to Railway backend Google OAuth flow
-      window.location.href = googleOAuthUrl;
+      window.location.href = `${baseUrl}/auth/google`;
     } catch (err: any) {
       showToast(err.message || "Gagal menghubungkan dengan Google", "error");
       setIsSubmitting(false);
@@ -133,7 +140,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
         loginSuccess(res.access_token, res.user);
         showToast(res.message || "Berhasil masuk! Mengalihkan ke dashboard...", "success");
 
-        const targetRole = (res.user?.role || userRole).toLowerCase();
+        const targetRole = (res.user?.role || "siswa").toLowerCase();
         setTimeout(() => {
           if (targetRole === "siswa") {
             router.push("/siswa");
@@ -181,7 +188,21 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
         setIsSignIn(true);
       }
     } catch (err: any) {
-      showToast(err.message || "Terjadi kesalahan. Silakan coba lagi.", "error");
+      const errStr = (err?.message || "").toString().toLowerCase();
+      if (
+        errStr.includes("not found") ||
+        errStr.includes("tidak ditemukan") ||
+        errStr.includes("unregistered") ||
+        errStr.includes("belum terdaftar") ||
+        errStr.includes("user not exist") ||
+        errStr.includes("cannot find") ||
+        errStr.includes("404")
+      ) {
+        showToast("Email Anda belum terdaftar di sistem. Silakan lakukan pendaftaran (Daftar / Sign Up) terlebih dahulu.", "error");
+        setIsSignIn(false);
+      } else {
+        showToast(err.message || "Gagal masuk. Periksa kembali email dan kata sandi Anda.", "error");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -217,20 +238,22 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsSignIn(true)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${isSignIn
-              ? "bg-[#0B38E6] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              }`}
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+              isSignIn
+                ? "bg-[#0B38E6] text-white shadow-md"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            }`}
           >
             <span>Masuk / Sign In</span>
           </button>
           <button
             type="button"
             onClick={() => setIsSignIn(false)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${!isSignIn
-              ? "bg-[#0B38E6] text-white shadow-md"
-              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              }`}
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
+              !isSignIn
+                ? "bg-[#0B38E6] text-white shadow-md"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            }`}
           >
             <span>Daftar / Sign Up</span>
           </button>

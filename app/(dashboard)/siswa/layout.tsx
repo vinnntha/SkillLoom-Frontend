@@ -46,8 +46,10 @@ export default function SiswaDashboardLayout({
 
   // Client-side Token Guard: Redirect unauthenticated users
   React.useEffect(() => {
-    if (!isLoading && (!token || !user)) {
-      router.replace("/?auth=login");
+    if (!isLoading) {
+      if (!token || !user) {
+        router.replace("/auth");
+      }
     }
   }, [isLoading, token, user, router]);
 

@@ -89,11 +89,6 @@ export default function SiswaDashboardLayout({
       href: "/siswa/wallet",
       icon: Wallet,
     },
-    {
-      name: "Profil Saya",
-      href: "/siswa/profile",
-      icon: User,
-    },
   ];
 
   const handleLogout = () => {
@@ -231,7 +226,7 @@ export default function SiswaDashboardLayout({
               </div>
               <div>
                 <h4 className="font-bold text-sm text-slate-800">{displayName}</h4>
-                <p className="text-xs text-slate-500">RPL - SMK Negeri 4</p>
+                <p className="text-xs text-slate-500"></p>
               </div>
             </div>
 

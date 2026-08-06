@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { AuthBrandShowcase } from "./AuthBrandShowcase";
 import { AuthFormContainer } from "./AuthFormContainer";
 
@@ -22,7 +22,15 @@ export const AuthPageContainer: React.FC<AuthPageContainerProps> = ({
 
       {/* Right Column: Interactive Form Container */}
       <section className="w-full h-full flex flex-col justify-center">
-        <AuthFormContainer isSignIn={isSignIn} setIsSignIn={setIsSignIn} />
+        <Suspense
+          fallback={
+            <div className="w-full h-full flex items-center justify-center p-8 text-slate-400 text-sm font-medium">
+              Memuat...
+            </div>
+          }
+        >
+          <AuthFormContainer isSignIn={isSignIn} setIsSignIn={setIsSignIn} />
+        </Suspense>
       </section>
     </main>
   );

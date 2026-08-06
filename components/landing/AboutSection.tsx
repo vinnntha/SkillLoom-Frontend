@@ -6,7 +6,7 @@ import { ArrowUpRight, GraduationCap, Building, ShieldCheck, CheckCircle2 } from
 
 export const AboutSection: React.FC = () => {
   return (
-    <section id="tentang" className="bg-[#F4F6F9] py-14 sm:py-20 px-4 sm:px-8 lg:px-12 rounded-[32px] sm:rounded-[48px] md:rounded-[60px] -mt-6 sm:-mt-10 mb-12 sm:mb-20 relative z-20 overflow-hidden">
+    <section id="tentang" className="bg-[#F4F6F9] py-14 sm:py-20 px-4 sm:px-8 lg:px-12 rounded-[32px] sm:rounded-[48px] md:rounded-[60px] -mt-6 sm:-mt-10 relative z-20 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-10 sm:mb-16">
@@ -37,7 +37,7 @@ export const AboutSection: React.FC = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="md:col-span-2 bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-[#0B38E6]/15 transition-all duration-300 relative overflow-hidden group flex flex-col justify-between"
+            className="md:col-span-2 bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm relative overflow-hidden group flex flex-col justify-between"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#0B38E6]/5 rounded-full blur-3xl -z-10 group-hover:bg-[#0B38E6]/10 transition-colors duration-500" />
             
@@ -50,7 +50,7 @@ export const AboutSection: React.FC = () => {
 
             {/* Stats Overlay */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-2 sm:mt-auto">
-              <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 shadow-md shadow-[#0B38E6]/15 hover:shadow-lg hover:shadow-[#0B38E6]/25 transition-all flex-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 shadow-sm hover:shadow-md transition-shadow flex-1">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#0B38E6] flex items-center justify-center text-white shrink-0">
                   <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
@@ -60,7 +60,7 @@ export const AboutSection: React.FC = () => {
                 </div>
               </div>
               
-              <div className="bg-slate-50 border border-slate-200/70 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 shadow-md shadow-lime-600/20 hover:shadow-lg hover:shadow-lime-600/30 transition-all flex-1">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 sm:p-4 flex items-center gap-3.5 sm:gap-4 shadow-sm hover:shadow-md transition-shadow flex-1">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#A1FF00] flex items-center justify-center text-slate-900 shrink-0">
                   <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
@@ -78,7 +78,7 @@ export const AboutSection: React.FC = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-[#A1FF00] text-slate-900 rounded-3xl p-6 sm:p-10 flex flex-col justify-between shadow-2xl shadow-[#A1FF00]/40 hover:shadow-2xl hover:shadow-[#A1FF00]/60 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300 min-h-[220px] sm:min-h-[auto] border border-lime-400/40"
+            className="bg-[#A1FF00] text-slate-900 rounded-3xl p-6 sm:p-10 flex flex-col justify-between shadow-lg relative overflow-hidden group hover:scale-[1.02] transition-transform min-h-[220px] sm:min-h-[auto]"
           >
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/20 rounded-full blur-2xl" />
             
@@ -100,14 +100,14 @@ export const AboutSection: React.FC = () => {
         </div>
 
         {/* Card C: 3 Equal Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mt-8 sm:mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 mt-5 sm:mt-6">
           {/* Box 1 (Siswa) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-xl shadow-blue-600/12 hover:shadow-2xl hover:shadow-blue-600/25 transition-all duration-300 group"
+            className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-[#0B38E6] flex items-center justify-center group-hover:bg-[#0B38E6] group-hover:text-white transition-colors shrink-0">
@@ -127,7 +127,7 @@ export const AboutSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-3xl p-5 sm:p-6 border border-emerald-100 shadow-xl shadow-emerald-600/12 hover:shadow-2xl hover:shadow-emerald-600/25 transition-all duration-300 group"
+            className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0">
@@ -147,7 +147,7 @@ export const AboutSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-3xl p-5 sm:p-6 border border-purple-100 shadow-xl shadow-purple-600/12 hover:shadow-2xl hover:shadow-purple-600/25 transition-all duration-300 group"
+            className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group"
           >
             <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0">

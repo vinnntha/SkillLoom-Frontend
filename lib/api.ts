@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.132.27.105:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
 
 export function getToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -104,6 +104,12 @@ export const api = {
       position: string;
     }) =>
       request<{ message: string; user: any }>("/auth/register/admin", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    googleLogin: (payload: { idToken?: string; credential?: string; role?: string }) =>
+      request<{ message: string; access_token: string; user: any }>("/auth/google", {
         method: "POST",
         body: JSON.stringify(payload),
       }),

@@ -58,6 +58,45 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     setToast({ isOpen: true, message, type });
   };
 
+  const userRoleRef = React.useRef(userRole);
+  const isGsiInitializedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    userRoleRef.current = userRole;
+  }, [userRole]);
+
+  // Load Google GIS Script dynamically without background One Tap prompt
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const scriptId = "google-gsi-script";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
+    showToast("Menghubungkan dengan layanan Google...", "info");
+
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
+      const stateParam = encodeURIComponent(JSON.stringify({ role: userRole.toUpperCase() }));
+      const googleOAuthUrl = `${baseUrl}/auth/google?state=${stateParam}`;
+
+      // Redirect directly to Railway backend Google OAuth flow
+      window.location.href = googleOAuthUrl;
+    } catch (err: any) {
+      showToast(err.message || "Gagal menghubungkan dengan Google", "error");
+      setIsSubmitting(false);
+    }
+  };
+
   // Form State
   const [formData, setFormData] = useState({
     email: "",
@@ -151,7 +190,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   return (
     <div className="w-full h-full flex flex-col justify-center items-center p-3 sm:p-8 lg:p-12 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[20px] sm:rounded-[32px] p-4 sm:p-8 md:p-10 shadow-2xl relative">
-        
+
         {/* Mobile Header (visible only on screens < lg) */}
         <div className="flex lg:hidden items-center justify-between gap-4 w-full mb-4 pb-3 border-b border-slate-100 dark:border-slate-800/80">
           <Link href="/" className="group flex items-center gap-2">
@@ -178,22 +217,20 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           <button
             type="button"
             onClick={() => setIsSignIn(true)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-              isSignIn
-                ? "bg-[#0B38E6] text-white shadow-md"
-                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${isSignIn
+              ? "bg-[#0B38E6] text-white shadow-md"
+              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             <span>Masuk / Sign In</span>
           </button>
           <button
             type="button"
             onClick={() => setIsSignIn(false)}
-            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${
-              !isSignIn
-                ? "bg-[#0B38E6] text-white shadow-md"
-                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
+            className={`flex-1 py-2 sm:py-3 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${!isSignIn
+              ? "bg-[#0B38E6] text-white shadow-md"
+              : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+              }`}
           >
             <span>Daftar / Sign Up</span>
           </button>
@@ -223,8 +260,9 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
               {/* Social Login Button */}
               <button
                 type="button"
-                onClick={() => showToast("Menghubungkan dengan layanan Google...", "info")}
-                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2 sm:py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm shadow-sm active:scale-[0.99]"
+                onClick={handleGoogleLogin}
+                disabled={isSubmitting}
+                className="w-full border border-slate-200 dark:border-slate-700 rounded-xl py-2 sm:py-3 px-4 flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all font-semibold text-slate-700 dark:text-slate-200 text-sm shadow-sm active:scale-[0.99] disabled:opacity-50"
               >
                 <svg className="w-4 h-4 sm:w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -385,11 +423,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("siswa")}
-                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                      userRole === "siswa"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
-                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`}
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${userRole === "siswa"
+                      ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
+                      : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
+                      }`}
                   >
                     <GraduationCap className="w-4 h-4" />
                     <span>Siswa SMK</span>
@@ -399,11 +436,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("umkm")}
-                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                      userRole === "umkm"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
-                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`}
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${userRole === "umkm"
+                      ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
+                      : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
+                      }`}
                   >
                     <Building className="w-4 h-4" />
                     <span>UMKM</span>
@@ -413,16 +449,15 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                   <button
                     type="button"
                     onClick={() => setUserRole("admin")}
-                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${
-                      userRole === "admin"
-                        ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
-                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
-                    }`}
+                    className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold flex flex-col items-center gap-1 transition-all ${userRole === "admin"
+                      ? "bg-[#0B38E6]/10 border-[#0B38E6] text-[#0B38E6] dark:text-[#A1FF00] dark:bg-[#0B38E6]/30 dark:border-[#0B38E6] shadow-sm scale-[1.01]"
+                      : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300"
+                      }`}
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>Guru/Sekolah</span>
                   </button>
-                </div> 
+                </div>
               </div>
 
               {/* Dynamic Registration Form Fields */}

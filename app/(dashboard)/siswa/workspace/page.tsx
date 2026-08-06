@@ -2,19 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  Clock, 
-  UploadCloud, 
-  Link as LinkIcon, 
-  MessageSquare, 
-  Paperclip, 
-  Send, 
-  FileText, 
-  User, 
-  Building2, 
-  Check, 
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  UploadCloud,
+  Link as LinkIcon,
+  MessageSquare,
+  Paperclip,
+  Send,
+  FileText,
+  User,
+  Building2,
+  Check,
   AlertCircle,
   X,
   FileCheck
@@ -62,7 +62,7 @@ export default function WorkspaceDetailPage() {
         if (Array.isArray(data) && data.length > 0) {
           setApplications(data);
           const active = data[0];
-          
+
           const dynamicMsgs: Message[] = [];
           if (active.project?.description) {
             dynamicMsgs.push({
@@ -152,7 +152,7 @@ export default function WorkspaceDetailPage() {
       setIsSubmitting(false);
       setIsSubmitted(true);
       setCurrentStep(3); // Advance stepper to "Review UMKM"
-      
+
       // Add message to chat about submission
       const botMessage: Message = {
         id: `msg-submit-${Date.now()}`,
@@ -208,17 +208,17 @@ export default function WorkspaceDetailPage() {
   const activeApp = applications.length > 0 ? applications[0] : null;
   const projectTitle = activeApp?.project?.title || "Proyek Vokasi";
   const umkmName = activeApp?.project?.umkm?.companyName || "UMKM Partner";
-  const projectBudget = activeApp?.project?.budget 
-    ? `Rp ${Number(activeApp.project.budget).toLocaleString("id-ID")}` 
+  const projectBudget = activeApp?.project?.budget
+    ? `Rp ${Number(activeApp.project.budget).toLocaleString("id-ID")}`
     : "Rp 0";
-  const projectDescription = activeApp?.project?.description || 
+  const projectDescription = activeApp?.project?.description ||
     "Belum ada deskripsi instruksi proyek.";
   const appStatus = activeApp?.status || "PENDING";
 
   if (isLoadingApps) {
     return (
       <div className="bg-white rounded-3xl p-12 text-center text-slate-500 font-medium border border-slate-100 shadow-sm">
-        Memuat data workspace dari backend http://10.132.27.105:3001...
+        Memuat data workspace dari backend generous-unity-production-a8c9.up.railway.app...
       </div>
     );
   }
@@ -239,11 +239,11 @@ export default function WorkspaceDetailPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
+
       {/* Toast Notification */}
       <AnimatePresence>
         {showToast && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -256,7 +256,7 @@ export default function WorkspaceDetailPage() {
               <h5 className="font-bold text-sm">Pengiriman Berhasil</h5>
               <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{toastMessage}</p>
             </div>
-            <button 
+            <button
               onClick={() => setShowToast(false)}
               className="text-slate-400 hover:text-white transition-colors"
             >
@@ -277,13 +277,12 @@ export default function WorkspaceDetailPage() {
             <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
               {projectTitle}
             </h1>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-              appStatus === "ACCEPTED"
-                ? "bg-[#A1FF00] text-slate-900" 
-                : appStatus === "REJECTED"
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${appStatus === "ACCEPTED"
+              ? "bg-[#A1FF00] text-slate-900"
+              : appStatus === "REJECTED"
                 ? "bg-rose-100 text-rose-800"
                 : "bg-amber-100 text-amber-800"
-            }`}>
+              }`}>
               {appStatus === "ACCEPTED" ? "DITERIMA (IN PROGRESS)" : appStatus === "REJECTED" ? "DITOLAK" : "MENUNGGU (PENDING)"}
             </span>
           </div>
@@ -295,7 +294,7 @@ export default function WorkspaceDetailPage() {
             <span>Batas Waktu: 5 Hari Lagi</span>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100 shrink-0 self-start md:self-auto">
           <div>
             <span className="text-[9px] font-bold text-slate-400 uppercase block tracking-wider">Nilai Proyek</span>
@@ -306,10 +305,10 @@ export default function WorkspaceDetailPage() {
 
       {/* 2-Column Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-        
+
         {/* LEFT COLUMN (70%): Project Brief & Submission */}
         <div className="lg:col-span-7 space-y-6">
-          
+
           {/* Card 1: Detail Proyek & Brief */}
           <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm space-y-6">
             <div>
@@ -323,7 +322,7 @@ export default function WorkspaceDetailPage() {
             {/* Markdown-style content */}
             <div className="prose prose-slate max-w-none text-xs text-slate-655 space-y-4 leading-relaxed">
               <p>{projectDescription}</p>
-              
+
               <h4 className="font-bold text-slate-900 text-sm mt-4">📋 Target Output Halaman:</h4>
               <ul className="list-disc list-inside space-y-1.5 pl-2">
                 <li>Header dengan logo Kedai Kopi Senja & Menu Navigasi simpel.</li>
@@ -343,7 +342,7 @@ export default function WorkspaceDetailPage() {
             <div className="border-t border-slate-100 pt-6">
               <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">Berkas Brief Terlampir:</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <a 
+                <a
                   href="#"
                   onClick={(e) => { e.preventDefault(); alert("Mengunduh aset_gambar_kopi.zip..."); }}
                   className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-colors group"
@@ -360,7 +359,7 @@ export default function WorkspaceDetailPage() {
                   <span className="text-[10px] font-bold text-[#0B38E6] group-hover:underline">Download</span>
                 </a>
 
-                <a 
+                <a
                   href="#"
                   onClick={(e) => { e.preventDefault(); alert("Membuka design_figma_wireframe.fig..."); }}
                   className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-colors group"
@@ -403,7 +402,7 @@ export default function WorkspaceDetailPage() {
                     Pekerjaan Anda sedang dalam tahap review oleh pihak UMKM dan Guru Pembimbing. Anda akan mendapatkan notifikasi jika ada perbaikan.
                   </p>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsSubmitted(false)}
                   className="text-xs font-bold text-[#0B38E6] hover:underline"
                 >
@@ -435,13 +434,13 @@ export default function WorkspaceDetailPage() {
                   <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
                     Upload Berkas Pendukung (Opsional)
                   </label>
-                  <div 
+                  <div
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     className="border-2 border-dashed border-slate-200/80 hover:border-[#0B38E6] bg-white rounded-2xl p-6 text-center transition-colors cursor-pointer relative group"
                   >
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       multiple
                       onChange={handleFileChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -502,7 +501,7 @@ export default function WorkspaceDetailPage() {
 
         {/* RIGHT COLUMN (30%): Timeline stepper & chat */}
         <div className="lg:col-span-3 space-y-6">
-          
+
           {/* Card 3: Milestone / Timeline Stepper */}
           <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-5">
             <div>
@@ -512,7 +511,7 @@ export default function WorkspaceDetailPage() {
 
             {/* Stepper items */}
             <div className="space-y-6 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
-              
+
               {/* Step 1: Diterima */}
               <div className="flex gap-4 relative">
                 <div className="h-7 w-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm relative z-10">
@@ -528,11 +527,10 @@ export default function WorkspaceDetailPage() {
 
               {/* Step 2: Pengerjaan */}
               <div className="flex gap-4 relative">
-                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-colors duration-300 ${
-                  currentStep >= 3 
-                    ? "bg-emerald-500 text-white" 
-                    : "bg-[#0B38E6] text-white"
-                }`}>
+                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-colors duration-300 ${currentStep >= 3
+                  ? "bg-emerald-500 text-white"
+                  : "bg-[#0B38E6] text-white"
+                  }`}>
                   {currentStep >= 3 ? (
                     <Check className="h-4 w-4 font-bold" />
                   ) : (
@@ -552,11 +550,10 @@ export default function WorkspaceDetailPage() {
 
               {/* Step 3: Review UMKM */}
               <div className="flex gap-4 relative">
-                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-all ${
-                  currentStep >= 3 
-                    ? "bg-[#0B38E6] text-white animate-pulse" 
-                    : "bg-slate-50 text-slate-400 border border-slate-100"
-                }`}>
+                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-all ${currentStep >= 3
+                  ? "bg-[#0B38E6] text-white animate-pulse"
+                  : "bg-slate-50 text-slate-400 border border-slate-100"
+                  }`}>
                   <span className="text-xs font-bold">3</span>
                 </div>
                 <div className="space-y-0.5">
@@ -603,11 +600,10 @@ export default function WorkspaceDetailPage() {
                         <span className="text-[9px] font-bold text-slate-500">{msg.senderName}</span>
                         <span className="text-[8px] text-slate-400 font-semibold">{msg.timestamp}</span>
                       </div>
-                      <div className={`p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
-                        isSelf 
-                          ? "bg-[#0B38E6] text-white rounded-tr-none" 
-                          : "bg-slate-50 text-slate-700 border border-slate-100 rounded-tl-none"
-                      }`}>
+                      <div className={`p-3 rounded-2xl text-[11px] leading-relaxed shadow-sm ${isSelf
+                        ? "bg-[#0B38E6] text-white rounded-tr-none"
+                        : "bg-slate-50 text-slate-700 border border-slate-100 rounded-tl-none"
+                        }`}>
                         {msg.content}
                       </div>
                     </div>

@@ -50,7 +50,7 @@ export const FeatureSection: React.FC = () => {
   ];
 
   return (
-    <section id="workflow" className="relative w-full bg-white rounded-[32px] sm:rounded-[48px] md:rounded-[60px] pt-10 sm:pt-14 pb-14 sm:pb-20 px-4 sm:px-8 lg:px-16 shadow-xl shadow-slate-900/10 z-20 overflow-hidden">
+    <section id="workflow" className="relative w-full bg-white rounded-t-[32px] sm:rounded-t-[48px] md:rounded-t-[60px] pt-10 sm:pt-14 pb-14 sm:pb-20 px-4 sm:px-8 lg:px-16 shadow-[0_-20px_50px_rgba(0,0,0,0.15)] z-20 overflow-hidden">
       {/* Background Decorative Accent */}
       <div className="absolute top-0 right-0 w-72 sm:w-96 h-72 sm:h-96 bg-blue-50/60 rounded-full blur-3xl -z-10 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-72 sm:w-96 h-72 sm:h-96 bg-[#A1FF00]/10 rounded-full blur-3xl -z-10 pointer-events-none" />

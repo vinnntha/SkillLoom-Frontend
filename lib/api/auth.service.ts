@@ -5,7 +5,7 @@ import {
   User,
 } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.132.27.105:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
 
 /**
  * Get JWT token from localStorage or Cookies (Client-side & Next.js App Router fallback)
@@ -102,6 +102,22 @@ export const authService = {
    */
   async login(payload: LoginPayload): Promise<AuthResponse> {
     const res = await fetcher<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    if (res.access_token) {
+      setAuthToken(res.access_token);
+    }
+
+    return res;
+  },
+
+  /**
+   * Google Login (POST /auth/google)
+   */
+  async googleLogin(payload: { idToken?: string; credential?: string; role?: string }): Promise<AuthResponse> {
+    const res = await fetcher<AuthResponse>("/auth/google", {
       method: "POST",
       body: JSON.stringify(payload),
     });

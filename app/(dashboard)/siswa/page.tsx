@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { 
-  Search as SearchIcon, 
-  Filter as FilterIcon, 
-  Clock, 
-  MapPin, 
-  Briefcase, 
-  Check, 
-  AlertCircle, 
+import {
+  Search as SearchIcon,
+  Filter as FilterIcon,
+  Clock,
+  MapPin,
+  Briefcase,
+  Check,
+  AlertCircle,
   ExternalLink,
   Sparkles,
   ChevronRight,
@@ -94,7 +94,7 @@ export default function EksplorasiProyekPage() {
           setApiProjects([]);
         }
       } catch (err) {
-        console.warn("Error loading projects from backend API (http://10.132.27.105:3001):", err);
+        console.warn("Error loading projects from backend API (generous-unity-production-a8c9.up.railway.app):", err);
         setApiProjects([]);
       } finally {
         setIsLoadingProjects(false);
@@ -113,15 +113,15 @@ export default function EksplorasiProyekPage() {
   // Filter logic
   const filteredProjects = useMemo(() => {
     return projectsToDisplay.filter((project) => {
-      const matchesSearch = 
+      const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.umkmName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesJurusan = 
+      const matchesJurusan =
         selectedJurusan === "Semua" || project.jurusan === selectedJurusan;
 
-      const matchesCategory = 
+      const matchesCategory =
         selectedCategory === "Semua" || project.category === selectedCategory;
 
       return matchesSearch && matchesJurusan && matchesCategory;
@@ -166,11 +166,11 @@ export default function EksplorasiProyekPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
+
       {/* Toast Notification */}
       <AnimatePresence>
         {showToast && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.9 }}
@@ -183,7 +183,7 @@ export default function EksplorasiProyekPage() {
               <h5 className="font-bold text-sm">Berhasil Mengirim Pitch!</h5>
               <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">{toastMessage}</p>
             </div>
-            <button 
+            <button
               onClick={() => setShowToast(false)}
               className="text-slate-400 hover:text-white transition-colors"
             >
@@ -289,11 +289,10 @@ export default function EksplorasiProyekPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer ${
-                isActive
-                  ? "bg-[#0B38E6] text-white shadow-md shadow-[#0B38E6]/25 scale-[1.02]"
-                  : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100"
-              }`}
+              className={`px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer ${isActive
+                ? "bg-[#0B38E6] text-white shadow-md shadow-[#0B38E6]/25 scale-[1.02]"
+                : "bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 border border-slate-100"
+                }`}
             >
               {cat}
             </button>

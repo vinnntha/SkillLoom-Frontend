@@ -10,7 +10,7 @@ import {
   ShowcaseItem,
 } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.132.27.105:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
 
 /**
  * Common fetch wrapper with automatic Authorization header injection

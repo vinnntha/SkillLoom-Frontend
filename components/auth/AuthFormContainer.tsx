@@ -24,6 +24,12 @@ import { Toast, ToastType } from "@/components/ui/Toast";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
+
 type RoleType = "siswa" | "umkm" | "admin";
 
 interface AuthFormContainerProps {
@@ -75,7 +81,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     userRoleRef.current = userRole;
   }, [userRole]);
 
-  // Load Google GIS Script dynamically without background One Tap prompt
+  // Load Google GIS Script dynamically
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -90,18 +96,160 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     }
   }, []);
 
-  const handleGoogleLogin = async () => {
-    setIsSubmitting(true);
-    showToast("Menghubungkan dengan layanan Google...", "info");
-
+  const fallbackGoogleRedirect = () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
-      // Redirect directly to Railway backend Google OAuth flow
-      window.location.href = `${baseUrl}/auth/google`;
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://generous-unity-production-a8c9.up.railway.app";
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const redirectCallback = `${currentOrigin}/auth/callback`;
+
+      const params = new URLSearchParams({
+        role: userRoleRef.current,
+        redirect_uri: redirectCallback,
+        frontend_url: currentOrigin,
+        callback_url: redirectCallback,
+        return_to: redirectCallback,
+        state: JSON.stringify({
+          role: userRoleRef.current,
+          origin: currentOrigin,
+          redirect: redirectCallback,
+        }),
+      });
+
+      window.location.href = `${baseUrl}/auth/google?${params.toString()}`;
     } catch (err: any) {
       showToast(err.message || "Gagal menghubungkan dengan Google", "error");
       setIsSubmitting(false);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
+    showToast("Menghubungkan dengan layanan Google...", "info");
+
+    const googleClientId =
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+      "811455490687-4ejpv1lrk0gk3nuvgo7tdiac97c2a42s.apps.googleusercontent.com";
+
+    // 1. Coba Google GIS OAuth Popup Client-Side terlebih dahulu
+    if (typeof window !== "undefined" && window.google?.accounts?.oauth2) {
+      try {
+        const client = window.google.accounts.oauth2.initCodeClient({
+          client_id: googleClientId,
+          scope: "openid email profile",
+          ux_mode: "popup",
+          callback: async (response: any) => {
+            if (response?.code) {
+              try {
+                showToast("Memverifikasi otentikasi Google...", "info");
+                const res = await api.auth.googleLogin({
+                  idToken: response.code,
+                  credential: response.code,
+                  role: userRoleRef.current.toUpperCase(),
+                });
+
+                if (res?.access_token) {
+                  loginSuccess(res.access_token, res.user);
+                  showToast(
+                    res.message || "Berhasil masuk dengan Google!",
+                    "success"
+                  );
+                  const targetRole = (
+                    res.user?.role || userRoleRef.current
+                  ).toLowerCase();
+                  setTimeout(() => {
+                    if (targetRole === "siswa") router.push("/siswa");
+                    else if (targetRole === "umkm") router.push("/umkm");
+                    else if (targetRole === "admin" || targetRole === "guru")
+                      router.push("/admin");
+                    else router.push("/siswa");
+                  }, 800);
+                  return;
+                }
+              } catch (err: any) {
+                showToast(
+                  err.message || "Gagal otentikasi Google dengan server",
+                  "error"
+                );
+              } finally {
+                setIsSubmitting(false);
+              }
+            } else {
+              setIsSubmitting(false);
+            }
+          },
+          error_callback: (err: any) => {
+            console.warn("Google OAuth Popup ditutup atau gagal:", err);
+            fallbackGoogleRedirect();
+          },
+        });
+        client.requestCode();
+        return;
+      } catch (e) {
+        console.warn("GIS oauth2 client failed, using fallback redirect:", e);
+      }
+    }
+
+    // 2. Coba Google GIS ID Token Prompt
+    if (typeof window !== "undefined" && window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: async (response: any) => {
+            if (response?.credential) {
+              try {
+                showToast("Memverifikasi otentikasi Google...", "info");
+                const res = await api.auth.googleLogin({
+                  credential: response.credential,
+                  role: userRoleRef.current.toUpperCase(),
+                });
+
+                if (res?.access_token) {
+                  loginSuccess(res.access_token, res.user);
+                  showToast(
+                    res.message || "Berhasil masuk dengan Google!",
+                    "success"
+                  );
+                  const targetRole = (
+                    res.user?.role || userRoleRef.current
+                  ).toLowerCase();
+                  setTimeout(() => {
+                    if (targetRole === "siswa") router.push("/siswa");
+                    else if (targetRole === "umkm") router.push("/umkm");
+                    else if (targetRole === "admin" || targetRole === "guru")
+                      router.push("/admin");
+                    else router.push("/siswa");
+                  }, 800);
+                  return;
+                }
+              } catch (err: any) {
+                showToast(err.message || "Gagal otentikasi Google", "error");
+              } finally {
+                setIsSubmitting(false);
+              }
+            } else {
+              setIsSubmitting(false);
+            }
+          },
+        });
+        window.google.accounts.id.prompt((notification: any) => {
+          if (
+            notification.isNotDisplayed() ||
+            notification.isSkippedMoment()
+          ) {
+            fallbackGoogleRedirect();
+          }
+        });
+        return;
+      } catch (e) {
+        console.warn("GIS id initialize failed, using fallback redirect:", e);
+      }
+    }
+
+    // 3. Fallback jika GIS belum siap
+    fallbackGoogleRedirect();
   };
 
   // Form State

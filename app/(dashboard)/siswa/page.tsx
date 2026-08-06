@@ -164,6 +164,10 @@ export default function EksplorasiProyekPage() {
     }
   };
 
+  const totalRewardSum = useMemo(() => {
+    return apiProjects.reduce((sum, p) => sum + (p.stipendRaw || 0), 0);
+  }, [apiProjects]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
 
@@ -204,8 +208,8 @@ export default function EksplorasiProyekPage() {
               Rekomendasi Proyek
             </span>
             <div>
-              <h3 className="text-3xl font-black text-white">4 Proyek</h3>
-              <p className="text-xs text-slate-200 mt-1 font-medium">Sesuai dengan keahlian RPL & Portofolio Anda</p>
+              <h3 className="text-3xl font-black text-white">{apiProjects.length} Proyek</h3>
+              <p className="text-xs text-slate-200 mt-1 font-medium">Sesuai dengan keahlian & Portofolio Anda</p>
             </div>
             <div className="flex items-center gap-1 text-xs text-[#A1FF00] font-bold">
               <span>Mulai eksplorasi sekarang</span>
@@ -217,8 +221,8 @@ export default function EksplorasiProyekPage() {
         <div className="bg-white p-6 rounded-3xl border border-slate-100 flex items-center justify-between shadow-sm">
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Reward Terbuka</span>
-            <h3 className="text-2xl font-black text-slate-800">Rp 4.000.000+</h3>
-            <p className="text-[11px] text-slate-500 font-medium">Berdasarkan seluruh proyek aktif di dashboard</p>
+            <h3 className="text-2xl font-black text-slate-800">Rp {totalRewardSum.toLocaleString("id-ID")}</h3>
+            <p className="text-[11px] text-slate-500 font-medium">Berdasarkan seluruh proyek aktif di backend</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <TrendingUp className="h-6 w-6" />

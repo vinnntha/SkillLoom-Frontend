@@ -44,6 +44,7 @@ export default function WorkspaceDetailPage() {
 
   // Applications from API
   const [applications, setApplications] = useState<any[]>([]);
+  const [selectedAppIndex, setSelectedAppIndex] = useState(0);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
 
   // Stepper State
@@ -53,7 +54,7 @@ export default function WorkspaceDetailPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
-  // Load applications from API (GET /applications/my-applications) and map dynamic chat messages
+  // Load applications from API (GET /applications/my-applications)
   useEffect(() => {
     async function loadMyApplications() {
       setIsLoadingApps(true);
@@ -61,41 +62,6 @@ export default function WorkspaceDetailPage() {
         const data = await api.applications.getMyApplications();
         if (Array.isArray(data) && data.length > 0) {
           setApplications(data);
-          const active = data[0];
-
-          const dynamicMsgs: Message[] = [];
-          if (active.project?.description) {
-            dynamicMsgs.push({
-              id: `msg-project-${active.project.id || "1"}`,
-              sender: "UMKM",
-              senderName: `${active.project.umkm?.companyName || "UMKM Partner"}`,
-              avatar: (active.project.umkm?.companyName || "U").substring(0, 2).toUpperCase(),
-              avatarBg: "bg-amber-100 text-amber-800",
-              content: `Halo! Instruksi proyek "${active.project.title}": ${active.project.description}`,
-              timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
-            });
-          }
-
-          if (active.pitchMessage) {
-            dynamicMsgs.push({
-              id: `msg-pitch-${active.id}`,
-              sender: "Siswa",
-              senderName: `${user?.name || "Anda"} (Siswa)`,
-              avatar: (user?.name || "S").substring(0, 2).toUpperCase(),
-              avatarBg: "bg-[#0B38E6] text-white",
-              content: `Pesan Lamaran Saya: "${active.pitchMessage}"`,
-              timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
-            });
-          }
-
-          setMessages(dynamicMsgs);
-
-          // Update current step based on backend status
-          if (active.status === "ACCEPTED") {
-            setCurrentStep(2);
-          } else if (active.status === "PENDING") {
-            setCurrentStep(1);
-          }
         } else {
           setApplications([]);
           setMessages([]);
@@ -110,6 +76,48 @@ export default function WorkspaceDetailPage() {
     }
     loadMyApplications();
   }, [user]);
+
+  // Update dynamic chat & stepper whenever selected project changes
+  useEffect(() => {
+    if (applications.length > 0) {
+      const active = applications[selectedAppIndex] || applications[0];
+      const dynamicMsgs: Message[] = [];
+
+      if (active.project?.description) {
+        dynamicMsgs.push({
+          id: `msg-project-${active.project.id || "1"}`,
+          sender: "UMKM",
+          senderName: `${active.project.umkm?.companyName || "UMKM Partner"}`,
+          avatar: (active.project.umkm?.companyName || "U").substring(0, 2).toUpperCase(),
+          avatarBg: "bg-amber-100 text-amber-800",
+          content: `Halo! Instruksi proyek "${active.project.title}": ${active.project.description}`,
+          timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+        });
+      }
+
+      if (active.pitchMessage) {
+        dynamicMsgs.push({
+          id: `msg-pitch-${active.id}`,
+          sender: "Siswa",
+          senderName: `${user?.name || "Anda"} (Siswa)`,
+          avatar: (user?.name || "S").substring(0, 2).toUpperCase(),
+          avatarBg: "bg-[#0B38E6] text-white",
+          content: `Pesan Lamaran Saya: "${active.pitchMessage}"`,
+          timestamp: active.createdAt ? new Date(active.createdAt).toLocaleDateString("id-ID") : "Terbaru",
+        });
+      }
+
+      setMessages(dynamicMsgs);
+
+      if (active.status === "ACCEPTED") {
+        setCurrentStep(2);
+      } else if (active.status === "PENDING") {
+        setCurrentStep(1);
+      } else if (active.status === "REJECTED") {
+        setCurrentStep(1);
+      }
+    }
+  }, [applications, selectedAppIndex, user]);
 
   // Toast State
   const [showToast, setShowToast] = useState(false);
@@ -205,7 +213,7 @@ export default function WorkspaceDetailPage() {
   };
 
   // Extract active application from API
-  const activeApp = applications.length > 0 ? applications[0] : null;
+  const activeApp = applications.length > 0 ? (applications[selectedAppIndex] || applications[0]) : null;
   const projectTitle = activeApp?.project?.title || "Proyek Vokasi";
   const umkmName = activeApp?.project?.umkm?.companyName || "UMKM Partner";
   const projectBudget = activeApp?.project?.budget
@@ -218,7 +226,7 @@ export default function WorkspaceDetailPage() {
   if (isLoadingApps) {
     return (
       <div className="bg-white rounded-3xl p-12 text-center text-slate-500 font-medium border border-slate-100 shadow-sm">
-        Memuat data workspace dari backend generous-unity-production-a8c9.up.railway.app...
+        Memuat data workspace dari backend
       </div>
     );
   }
@@ -265,6 +273,29 @@ export default function WorkspaceDetailPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Multi-Project Selection Tabs */}
+      {applications.length > 1 && (
+        <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3 overflow-x-auto">
+          <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider shrink-0">Pilih Proyek:</span>
+          {applications.map((app: any, idx: number) => {
+            const isSelected = selectedAppIndex === idx;
+            return (
+              <button
+                key={app.id || idx}
+                onClick={() => setSelectedAppIndex(idx)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? "bg-[#0B38E6] text-white border-transparent shadow-sm"
+                    : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
+                }`}
+              >
+                {app.project?.title || `Proyek ${idx + 1}`}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Top Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">

@@ -60,8 +60,12 @@ export default function UmkmDashboardLayout({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F4F6F9] flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="h-14 w-14 rounded-2xl bg-[#0B38E6] flex items-center justify-center p-2 shadow-xl shadow-[#0B38E6]/25 animate-bounce">
-          <Building2 className="h-8 w-8 text-[#A1FF00]" />
+        <div className="h-14 w-14 rounded-2xl bg-slate-900 flex items-center justify-center p-2 shadow-xl shadow-slate-900/10 animate-bounce overflow-hidden border border-slate-800">
+          <img
+            src="/logo1.png"
+            alt="SkillLoom Logo"
+            className="h-full w-auto object-contain"
+          />
         </div>
         <div className="text-center space-y-1">
           <p className="text-xs font-black text-slate-800 tracking-wider uppercase">

@@ -149,7 +149,7 @@ export default function UmkmDashboardLayout({
         <div className="flex items-center gap-3 mb-8 px-2">
           <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center p-1.5 shadow-lg shadow-slate-900/15 overflow-hidden shrink-0 border border-slate-800">
             <img
-              src="/logo-s.png"
+              src="/logo1.png"
               alt="SkillLoom Logo"
               className="h-full w-full object-contain drop-shadow"
             />
@@ -265,7 +265,7 @@ export default function UmkmDashboardLayout({
       <header className="md:hidden bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0 border border-slate-800">
-            <img src="/logo-s.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
+            <img src="/logo1.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <h1 className="font-extrabold text-base text-slate-900 leading-none">
@@ -302,7 +302,7 @@ export default function UmkmDashboardLayout({
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
                 <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 overflow-hidden shrink-0 border border-slate-800">
-                  <img src="/logo-s.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
+                  <img src="/logo1.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
                 </div>
                 <h1 className="font-black text-lg text-slate-900">SkillLoom UMKM</h1>
               </div>

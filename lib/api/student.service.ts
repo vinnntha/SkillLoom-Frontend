@@ -63,37 +63,15 @@ export const studentService = {
    * Fetch approved projects/bounties available for students (GET /projects)
    */
   async getProjects(params?: GetProjectsQueryParams): Promise<ProjectItem[]> {
-    let fetched: ProjectItem[] = [];
-    try {
-      const queryParams = new URLSearchParams();
-      if (params?.category && params.category !== "Semua") {
-        queryParams.append("category", params.category);
-      }
-      if (params?.search) {
-        queryParams.append("search", params.search);
-      }
-      const queryStr = queryParams.toString();
-      fetched = await fetcher<ProjectItem[]>(`/projects${queryStr ? `?${queryStr}` : ""}`);
-    } catch (err) {
-      console.warn("Could not fetch remote projects:", err);
+    const queryParams = new URLSearchParams();
+    if (params?.category && params.category !== "Semua") {
+      queryParams.append("category", params.category);
     }
-
-    if (typeof window !== "undefined") {
-      try {
-        const localList: ProjectItem[] = JSON.parse(
-          localStorage.getItem("skillloom_local_projects") || "[]"
-        );
-        const existingIds = new Set(
-          (fetched || []).map((p: any) => p.id || p._id)
-        );
-        const toAdd = localList.filter(
-          (p: any) => !existingIds.has(p.id || p._id)
-        );
-        return [...toAdd, ...(Array.isArray(fetched) ? fetched : [])];
-      } catch {}
+    if (params?.search) {
+      queryParams.append("search", params.search);
     }
-
-    return Array.isArray(fetched) ? fetched : [];
+    const queryStr = queryParams.toString();
+    return fetcher<ProjectItem[]>(`/projects${queryStr ? `?${queryStr}` : ""}`);
   },
 
   /**

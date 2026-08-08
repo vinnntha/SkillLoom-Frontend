@@ -52,7 +52,7 @@ export default function UmkmDashboardLayout({
   useEffect(() => {
     if (!isLoading) {
       if (!token || !user) {
-        router.replace("/(auth)/login");
+        router.replace("/");
       }
     }
   }, [isLoading, token, user, router]);

@@ -155,38 +155,16 @@ export const api = {
   // PROJECTS ENDPOINTS
   // ==========================================
   projects: {
-    getAll: async (params?: { category?: string; search?: string }) => {
-      let fetched: any[] = [];
-      try {
-        const queryParams = new URLSearchParams();
-        if (params?.category && params.category !== "Semua") {
-          queryParams.append("category", params.category);
-        }
-        if (params?.search) {
-          queryParams.append("search", params.search);
-        }
-        const queryStr = queryParams.toString();
-        fetched = await request<any[]>(`/projects${queryStr ? `?${queryStr}` : ""}`);
-      } catch (err) {
-        console.warn("Could not fetch remote projects:", err);
+    getAll: (params?: { category?: string; search?: string }) => {
+      const queryParams = new URLSearchParams();
+      if (params?.category && params.category !== "Semua") {
+        queryParams.append("category", params.category);
       }
-
-      if (typeof window !== "undefined") {
-        try {
-          const localList: any[] = JSON.parse(
-            localStorage.getItem("skillloom_local_projects") || "[]"
-          );
-          const existingIds = new Set(
-            (fetched || []).map((p: any) => p.id || p._id)
-          );
-          const toAdd = localList.filter(
-            (p: any) => !existingIds.has(p.id || p._id)
-          );
-          return [...toAdd, ...(Array.isArray(fetched) ? fetched : [])];
-        } catch {}
+      if (params?.search) {
+        queryParams.append("search", params.search);
       }
-
-      return Array.isArray(fetched) ? fetched : [];
+      const queryStr = queryParams.toString();
+      return request<any[]>(`/projects${queryStr ? `?${queryStr}` : ""}`);
     },
 
     getById: (id: string) => request<any>(`/projects/${id}`),

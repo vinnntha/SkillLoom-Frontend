@@ -48,7 +48,7 @@ export default function SiswaDashboardLayout({
   React.useEffect(() => {
     if (!isLoading) {
       if (!token || !user) {
-        router.replace("/auth");
+        router.replace("/");
       }
     }
   }, [isLoading, token, user, router]);

@@ -61,52 +61,40 @@ export default function EksplorasiProyekPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
-  // Fetch Projects from backend API (GET /projects) and local sync
+  // Fetch Projects strictly from backend API (GET /projects)
   useEffect(() => {
     async function loadProjects() {
       setIsLoadingProjects(true);
       try {
         const fetched = await api.projects.getAll({
+          category: selectedCategory !== "Semua" ? selectedCategory : undefined,
           search: searchQuery || undefined,
         });
 
-        if (Array.isArray(fetched) && fetched.length > 0) {
-          const mapped: Project[] = fetched.map((item: any) => {
-            const rawCat = (item.category || "RPL").toUpperCase();
-            let catLabel = "Web Development";
-            if (rawCat.includes("DKV") || rawCat.includes("DESAIN")) catLabel = "Desain Grafis";
-            else if (rawCat.includes("BISNIS") || rawCat.includes("MARKETING")) catLabel = "Sosial Media";
-            else if (rawCat.includes("TKJ")) catLabel = "Jaringan & Server";
-            else if (rawCat.includes("MULTI")) catLabel = "Multimedia";
-
-            return {
-              id: item.id || item._id,
-              title: item.title,
-              umkmName: item.umkm?.companyName || "UMKM Mitra",
-              timePosted: "Baru saja",
-              stipend: `Rp ${Number(item.budget || 0).toLocaleString("id-ID")}`,
-              stipendRaw: Number(item.budget || 0),
-              deadline: item.deadline
-                ? new Date(item.deadline).toLocaleDateString("id-ID")
-                : "21 Hari",
-              tags: [item.category || "Vokasi", catLabel, "Bounty"],
-              jurusan: item.category || "RPL",
-              category: catLabel,
-              location: item.umkm?.address || "Indonesia",
-              logoText: (item.umkm?.companyName || item.title || "U")
-                .substring(0, 3)
-                .toUpperCase(),
-              logoBg: "bg-blue-100 text-blue-800",
-              description: item.description || "Deskripsi proyek.",
-              requirements: ["Siswa Aktif SMK", "Komitmen Selesai Tepat Waktu"],
-            };
-          });
+        if (Array.isArray(fetched)) {
+          const mapped: Project[] = fetched.map((item: any) => ({
+            id: item.id || item._id,
+            title: item.title,
+            umkmName: item.umkm?.companyName || "UMKM Partner",
+            timePosted: "Baru saja",
+            stipend: `Rp ${Number(item.budget || 0).toLocaleString("id-ID")}`,
+            stipendRaw: Number(item.budget || 0),
+            deadline: item.deadline ? new Date(item.deadline).toLocaleDateString("id-ID") : "7 Hari",
+            tags: [item.category || "General", "Vokasi"],
+            jurusan: item.category || "RPL",
+            category: item.category || "Web Development",
+            location: item.umkm?.address || "Indonesia",
+            logoText: (item.umkm?.companyName || "U").substring(0, 3).toUpperCase(),
+            logoBg: "bg-blue-100 text-blue-800",
+            description: item.description || "Deskripsi proyek.",
+            requirements: ["Siswa Aktif SMK", "Komitmen Selesai Tepat Waktu"],
+          }));
           setApiProjects(mapped);
         } else {
           setApiProjects([]);
         }
       } catch (err) {
-        console.warn("Error loading projects from backend API:", err);
+        console.warn("Error loading projects from backend API (generous-unity-production-a8c9.up.railway.app):", err);
         setApiProjects([]);
       } finally {
         setIsLoadingProjects(false);
@@ -114,13 +102,13 @@ export default function EksplorasiProyekPage() {
     }
 
     loadProjects();
-  }, [searchQuery]);
+  }, [selectedCategory, searchQuery]);
 
   const projectsToDisplay = apiProjects;
 
   // Unique categories derived from projects
   const categories = ["Semua", "Web Development", "Desain Grafis", "Sosial Media", "RPL", "DKV"];
-  const jurusans = ["Semua", "RPL", "TKJ", "DKV", "MULTIMEDIA", "BISNIS_DIGITAL", "AKUNTANSI"];
+  const jurusans = ["Semua", "RPL", "DKV", "Pemasaran Digital"];
 
   // Filter logic
   const filteredProjects = useMemo(() => {
@@ -128,22 +116,13 @@ export default function EksplorasiProyekPage() {
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.umkmName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.tags.some((tag) =>
-          tag.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesJurusan =
-        selectedJurusan === "Semua" ||
-        project.jurusan.toUpperCase() === selectedJurusan.toUpperCase();
+        selectedJurusan === "Semua" || project.jurusan === selectedJurusan;
 
       const matchesCategory =
-        selectedCategory === "Semua" ||
-        project.category === selectedCategory ||
-        (selectedCategory === "RPL" && project.jurusan === "RPL") ||
-        (selectedCategory === "DKV" && project.jurusan === "DKV") ||
-        (selectedCategory === "Web Development" && (project.jurusan === "RPL" || project.category === "Web Development")) ||
-        (selectedCategory === "Desain Grafis" && (project.jurusan === "DKV" || project.category === "Desain Grafis")) ||
-        (selectedCategory === "Sosial Media" && (project.jurusan === "BISNIS_DIGITAL" || project.category === "Sosial Media"));
+        selectedCategory === "Semua" || project.category === selectedCategory;
 
       return matchesSearch && matchesJurusan && matchesCategory;
     });

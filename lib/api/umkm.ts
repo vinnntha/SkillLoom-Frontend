@@ -85,10 +85,54 @@ export const umkmApi = {
   },
 
   async createProject(payload: CreateProjectPayload): Promise<ProjectItem> {
-    return fetcher<ProjectItem>("/projects", {
+    const res = await fetcher<ProjectItem>("/projects", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+
+    // Save to local cache so student dashboard immediately displays the new project
+    if (typeof window !== "undefined" && res) {
+      try {
+        const stored = JSON.parse(
+          localStorage.getItem("skillloom_local_projects") || "[]"
+        );
+        const resId = res.id || (res as any)._id;
+        const exists = stored.some((p: any) => (p.id || p._id) === resId);
+        if (!exists) {
+          const userStr = localStorage.getItem("user");
+          const userObj = userStr ? JSON.parse(userStr) : null;
+          const enriched = {
+            ...res,
+            id: resId || `proj-${Date.now()}`,
+            title: res.title || payload.title,
+            description: res.description || payload.description,
+            category: res.category || payload.category,
+            budget: Number(res.budget || payload.budget),
+            deadline: res.deadline || payload.deadline,
+            status: res.status || "OPEN",
+            createdAt: res.createdAt || new Date().toISOString(),
+            umkm: res.umkm || {
+              companyName:
+                userObj?.umkmProfile?.companyName ||
+                userObj?.name ||
+                "Mitra UMKM",
+              industryType:
+                userObj?.umkmProfile?.industryType || payload.category,
+              address: userObj?.umkmProfile?.address || "Indonesia",
+            },
+          };
+          stored.unshift(enriched);
+          localStorage.setItem(
+            "skillloom_local_projects",
+            JSON.stringify(stored)
+          );
+        }
+      } catch (e) {
+        console.warn("Could not cache local project:", e);
+      }
+    }
+
+    return res;
   },
 
   async getAllApprovedProjects(params?: {

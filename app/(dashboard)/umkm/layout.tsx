@@ -147,8 +147,12 @@ export default function UmkmDashboardLayout({
       <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-100/90 p-6 shrink-0 h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="h-11 w-11 rounded-2xl bg-[#0B38E6] flex items-center justify-center p-2 shadow-lg shadow-[#0B38E6]/25 shrink-0">
-            <Building2 className="h-6 w-6 text-[#A1FF00]" />
+          <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center p-1.5 shadow-lg shadow-slate-900/15 overflow-hidden shrink-0 border border-slate-800">
+            <img
+              src="/logo-s.png"
+              alt="SkillLoom Logo"
+              className="h-full w-full object-contain drop-shadow"
+            />
           </div>
           <div>
             <h1 className="font-extrabold text-xl text-slate-900 tracking-tight flex items-center gap-1.5">
@@ -260,8 +264,8 @@ export default function UmkmDashboardLayout({
       {/* Mobile Top Header */}
       <header className="md:hidden bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-[#0B38E6] flex items-center justify-center p-1.5 shadow-md shadow-[#0B38E6]/20 shrink-0">
-            <Building2 className="h-5 w-5 text-[#A1FF00]" />
+          <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0 border border-slate-800">
+            <img src="/logo-s.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <h1 className="font-extrabold text-base text-slate-900 leading-none">
@@ -297,8 +301,8 @@ export default function UmkmDashboardLayout({
           <div className="bg-white w-4/5 max-w-sm h-full p-6 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className="h-9 w-9 rounded-xl bg-[#0B38E6] flex items-center justify-center p-1.5 shrink-0">
-                  <Building2 className="h-5 w-5 text-[#A1FF00]" />
+                <div className="h-9 w-9 rounded-xl bg-slate-900 flex items-center justify-center p-1 overflow-hidden shrink-0 border border-slate-800">
+                  <img src="/logo-s.png" alt="SkillLoom Logo" className="h-full w-full object-contain" />
                 </div>
                 <h1 className="font-black text-lg text-slate-900">SkillLoom UMKM</h1>
               </div>

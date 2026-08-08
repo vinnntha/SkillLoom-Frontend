@@ -113,8 +113,8 @@ export default function SiswaDashboardLayout({
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 p-6 shrink-0 h-screen sticky top-0">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0">
-            <img src="/logo1.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
+          <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0 border border-slate-800">
+            <img src="/logo-s.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
           </div>
           <div>
             <h1 className="font-extrabold text-lg text-slate-900 tracking-tight">SkillLoom</h1>

@@ -219,31 +219,43 @@ export const adminService = {
       const allProjects = await this.getAllProjects();
       const monitoredItems: StudentMonitoringItem[] = [];
 
-      allProjects.forEach((proj) => {
-        if (proj.applications && Array.isArray(proj.applications)) {
-          proj.applications.forEach((app) => {
-            if (app.siswa) {
-              monitoredItems.push({
-                id: app.id,
-                siswaId: app.siswaId,
-                fullName: app.siswa.fullName || "Siswa Vokasi",
-                nisn: app.siswa.nisn || "-",
-                jurusan: app.siswa.jurusan || proj.category || "RPL",
-                projectTitle: proj.title,
-                projectId: proj.id,
-                companyName: proj.umkm?.companyName || "Mitra UMKM",
-                industryType: proj.umkm?.industryType,
-                budget: proj.budget,
-                status: proj.status,
-                paymentStatus: "ESCROW_HELD",
-                deadline: proj.deadline,
-                appliedDate: app.createdAt,
-                pitchMessage: app.pitchMessage,
-              });
+      await Promise.all(
+        allProjects.map(async (proj) => {
+          let apps = proj.applications;
+          if (!apps || !Array.isArray(apps) || apps.length === 0) {
+            try {
+              apps = await adminFetcher<any[]>(`/applications/project/${proj.id}`);
+            } catch {
+              apps = [];
             }
-          });
-        }
-      });
+          }
+
+          if (Array.isArray(apps)) {
+            apps.forEach((app: any) => {
+              const studentObj = app.siswa || app.siswaProfile || app.user?.siswaProfile || app.user || app;
+              if (studentObj) {
+                monitoredItems.push({
+                  id: app.id || app._id || `app-${monitoredItems.length}`,
+                  siswaId: app.siswaId || studentObj.id || studentObj._id || "siswa",
+                  fullName: studentObj.fullName || studentObj.name || app.user?.email || "Siswa Vokasi",
+                  nisn: studentObj.nisn || "-",
+                  jurusan: studentObj.jurusan || proj.category || "RPL",
+                  projectTitle: proj.title,
+                  projectId: proj.id,
+                  companyName: proj.umkm?.companyName || "Mitra UMKM",
+                  industryType: proj.umkm?.industryType,
+                  budget: proj.budget,
+                  status: proj.status,
+                  paymentStatus: "ESCROW_HELD",
+                  deadline: proj.deadline,
+                  appliedDate: app.createdAt || new Date().toISOString(),
+                  pitchMessage: app.pitchMessage,
+                });
+              }
+            });
+          }
+        })
+      );
 
       return monitoredItems;
     } catch (error) {
@@ -251,4 +263,5 @@ export const adminService = {
       return [];
     }
   },
+
 };

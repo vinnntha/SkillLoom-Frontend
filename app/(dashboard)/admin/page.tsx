@@ -542,12 +542,20 @@ export default function AdminOverviewPage() {
                       <div className="flex items-center justify-end gap-2">
                         {/* Detail Modal Button */}
                         <button
-                          onClick={() => setSelectedProject(project)}
+                          onClick={async () => {
+                            try {
+                              const freshDetails = await adminService.getProjectById(project.id);
+                              setSelectedProject({ ...project, ...freshDetails });
+                            } catch {
+                              setSelectedProject(project);
+                            }
+                          }}
                           className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer"
                           title="Lihat Detail Proyek"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
+
 
                         {/* ACC / Approve Button */}
                         <button

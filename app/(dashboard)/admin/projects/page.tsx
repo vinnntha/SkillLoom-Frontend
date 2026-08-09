@@ -308,12 +308,20 @@ export default function AdminProjectsPage() {
 
               <div className="flex items-center gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
                 <button
-                  onClick={() => setSelectedProject(proj)}
+                  onClick={async () => {
+                    try {
+                      const freshDetails = await adminService.getProjectById(proj.id);
+                      setSelectedProject({ ...proj, ...freshDetails });
+                    } catch {
+                      setSelectedProject(proj);
+                    }
+                  }}
                   className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Eye className="h-4 w-4" />
                   <span>Detail</span>
                 </button>
+
 
                 {proj.isPendingModeration && (
                   <button

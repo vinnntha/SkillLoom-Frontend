@@ -108,11 +108,17 @@ export default function AdminDashboardLayout({
       icon: Wallet,
     },
     {
+      name: "Showcase Portofolio",
+      href: "/admin/showcases",
+      icon: Sparkles,
+    },
+    {
       name: "Profil Sekolah",
       href: "/admin/profile",
       icon: Building2,
     },
   ];
+
 
   const handleLogout = () => {
     setToast({

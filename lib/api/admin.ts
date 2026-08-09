@@ -8,6 +8,8 @@ import {
   StudentMonitoringItem,
   EscrowHoldPayload,
   TransactionItem,
+  ApplicationItem,
+  ShowcaseItem,
 } from "@/types/api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://generous-unity-production-a8c9.up.railway.app";
@@ -98,7 +100,27 @@ export const adminService = {
   },
 
   /**
-   * Get all transactions for admin audit
+   * Get applications submitted to a specific project (GET /applications/project/:projectId)
+   */
+  async getApplicationsByProject(projectId: string): Promise<ApplicationItem[]> {
+    return adminFetcher<ApplicationItem[]>(`/applications/project/${projectId}`);
+  },
+
+  /**
+   * Moderation status update for student applications (PATCH /applications/:id/status)
+   */
+  async updateApplicationStatus(
+    id: string,
+    status: "ACCEPTED" | "REJECTED"
+  ): Promise<ApplicationItem> {
+    return adminFetcher<ApplicationItem>(`/applications/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  /**
+   * Get all transactions for admin audit (GET /transactions or GET /transactions/my)
    */
   async getAllTransactions(): Promise<TransactionItem[]> {
     try {
@@ -132,6 +154,20 @@ export const adminService = {
   },
 
   /**
+   * Get portfolio showcases for supervision (GET /showcases)
+   */
+  async getShowcases(featured?: boolean): Promise<ShowcaseItem[]> {
+    return adminFetcher<ShowcaseItem[]>(`/showcases${featured ? "?featured=true" : ""}`);
+  },
+
+  /**
+   * Get detailed 1 showcase item (GET /showcases/:id)
+   */
+  async getShowcaseById(id: string): Promise<ShowcaseItem> {
+    return adminFetcher<ShowcaseItem>(`/showcases/${id}`);
+  },
+
+  /**
    * Fetch overview metrics for Admin Bento Grid using live Railway backend data
    */
   async getAdminOverview(): Promise<AdminOverviewMetrics> {
@@ -160,7 +196,6 @@ export const adminService = {
       let activeStudentsCount = 0;
       let totalEscrow = 0;
 
-      // Calculate total escrow from transactions if available, otherwise from projects in progress
       if (transactions && transactions.length > 0) {
         totalEscrow = transactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
       } else {
@@ -224,7 +259,7 @@ export const adminService = {
           let apps = proj.applications;
           if (!apps || !Array.isArray(apps) || apps.length === 0) {
             try {
-              apps = await adminFetcher<any[]>(`/applications/project/${proj.id}`);
+              apps = await this.getApplicationsByProject(proj.id);
             } catch {
               apps = [];
             }
@@ -263,5 +298,4 @@ export const adminService = {
       return [];
     }
   },
-
 };

@@ -269,4 +269,25 @@ export const api = {
 
     getById: (id: string) => request<any>(`/showcases/${id}`),
   },
+
+  // ==========================================
+  // ADMIN ENDPOINTS
+  // ==========================================
+  admin: {
+    getPending: () => request<any[]>("/projects/pending"),
+    approve: (id: string) =>
+      request<any>(`/projects/${id}/approve`, {
+        method: "PATCH",
+      }),
+    holdEscrow: (id: string, payload: { paymentStatus: string; paymentProof?: string }) =>
+      request<any>(`/transactions/${id}/hold`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    releaseEscrow: (id: string) =>
+      request<any>(`/transactions/${id}/release`, {
+        method: "PATCH",
+      }),
+  },
 };
+

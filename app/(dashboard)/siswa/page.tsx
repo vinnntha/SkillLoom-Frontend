@@ -140,11 +140,16 @@ export default function EksplorasiProyekPage() {
     setIsSubmitting(true);
 
     try {
+      let fullPitchMessage = pitchText;
+      if (estimatedDays) fullPitchMessage += `\n\n[Estimasi Pengerjaan]: ${estimatedDays} hari`;
+      if (portfolioLink) fullPitchMessage += `\n[Portofolio Terkait]: ${portfolioLink}`;
+
       // POST /applications
       await api.applications.apply({
         projectId: activePitchProject.id,
-        pitchMessage: pitchText,
+        pitchMessage: fullPitchMessage,
       });
+
 
       setActivePitchProject(null);
       setPitchText("");

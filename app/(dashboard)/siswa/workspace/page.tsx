@@ -196,21 +196,8 @@ export default function WorkspaceDetailPage() {
 
     setMessages(prev => [...prev, msg]);
     setNewMessage("");
-
-    // Automated prompt from UMKM for interactive response
-    setTimeout(() => {
-      const reply: Message = {
-        id: `msg-reply-${Date.now()}`,
-        sender: "UMKM",
-        senderName: `${umkmName} (UMKM)`,
-        avatar: (umkmName || "U").substring(0, 2).toUpperCase(),
-        avatarBg: "bg-amber-100 text-amber-800",
-        content: `Terima kasih atas update-nya! Kami telah menerima pesan mengenai proyek "${projectTitle}".`,
-        timestamp: "Baru saja"
-      };
-      setMessages(prev => [...prev, reply]);
-    }, 2000);
   };
+
 
   // Extract active application from API
   const activeApp = applications.length > 0 ? (applications[selectedAppIndex] || applications[0]) : null;
@@ -350,64 +337,13 @@ export default function WorkspaceDetailPage() {
               <div className="h-1 w-12 bg-[#0B38E6] rounded-full mt-2"></div>
             </div>
 
-            {/* Markdown-style content */}
-            <div className="prose prose-slate max-w-none text-xs text-slate-655 space-y-4 leading-relaxed">
-              <p>{projectDescription}</p>
-
-              <h4 className="font-bold text-slate-900 text-sm mt-4">📋 Target Output Halaman:</h4>
-              <ul className="list-disc list-inside space-y-1.5 pl-2">
-                <li>Header dengan logo Kedai Kopi Senja & Menu Navigasi simpel.</li>
-                <li>Hero Section interaktif (dengan foto produk andalan & tombol CTA "Pesan Sekarang").</li>
-                <li>Daftar Menu Kopi Artisan (3 Menu Utama dengan deskripsi, harga, dan rating).</li>
-                <li>Formulir Pemesanan cepat terintegrasi (menghasilkan string chat WhatsApp UMKM).</li>
-                <li>Footer berisikan jam operasional, alamat maps, dan tautan sosial media.</li>
-              </ul>
-
-              <h4 className="font-bold text-slate-900 text-sm mt-4">🎨 Panduan Desain:</h4>
-              <p>
-                Gunakan tone warna hangat seperti cokelat tua, krem, dan aksen putih gading. Desain harus memancarkan vibes yang cozy, modern, dan minimalis. Anda diperbolehkan menggunakan framework React/Next.js dengan styling Tailwind CSS.
+            {/* Real Project Brief Content */}
+            <div className="prose prose-slate max-w-none text-xs text-slate-700 space-y-4 leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-100">
+              <p className="font-semibold text-slate-800 leading-relaxed">
+                {projectDescription}
               </p>
             </div>
 
-            {/* Attached Files Section */}
-            <div className="border-t border-slate-100 pt-6">
-              <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">Berkas Brief Terlampir:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <a
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); alert("Mengunduh aset_gambar_kopi.zip..."); }}
-                  className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
-                      <Paperclip className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="block text-xs font-bold text-slate-700 truncate max-w-[180px]">aset_gambar_kopi.zip</span>
-                      <span className="text-[10px] text-slate-400 block font-semibold">14.2 MB • ZIP Archive</span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#0B38E6] group-hover:underline">Download</span>
-                </a>
-
-                <a
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); alert("Membuka design_figma_wireframe.fig..."); }}
-                  className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
-                      <LinkIcon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <span className="block text-xs font-bold text-slate-700 truncate max-w-[180px]">design_figma_wireframe</span>
-                      <span className="text-[10px] text-slate-400 block font-semibold">Figma Canvas Link</span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-[#0B38E6] group-hover:underline">Buka</span>
-                </a>
-              </div>
-            </div>
           </div>
 
           {/* Card 2: Form Pengiriman (Deliverables Submission) */}

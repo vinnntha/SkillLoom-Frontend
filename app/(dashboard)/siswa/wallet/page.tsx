@@ -160,10 +160,21 @@ export default function WalletPortfolioPage() {
 
     setIsPublishingShowcase(true);
     try {
+      // Fetch student's real project ID if available
+      let targetProjectId = "64f1a2b3c4d5e6f7a8b9c0d1";
+      try {
+        const myApps = await api.applications.getMyApplications();
+        if (Array.isArray(myApps) && myApps.length > 0 && myApps[0].projectId) {
+          targetProjectId = myApps[0].projectId;
+        }
+      } catch {
+        // Fallback
+      }
+
       await api.showcases.create({
-        projectId: "64f1a2b3c4d5e6f7a8b9c0d1", // Dummy fallback ID if project selection not bound
+        projectId: targetProjectId,
         title: showcaseTitle,
-        imageUrl: showcaseImage || "https://storage.example.com/showcases/vokasi_app.png",
+        imageUrl: showcaseImage || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop",
         testimonial: showcaseTestimonial || "Pekerjaan rapi dan sesuai instruksi.",
         rating: showcaseRating,
         isFeatured: true,
@@ -185,8 +196,9 @@ export default function WalletPortfolioPage() {
   };
 
   const handleExportPDF = () => {
-    alert("Mengekspor portofolio digital terverifikasi ke format PDF. Harap tunggu sebentar...");
+    window.print();
   };
+
 
   // Motion variants
   const containerVariants = {

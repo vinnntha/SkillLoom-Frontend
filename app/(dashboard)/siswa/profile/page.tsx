@@ -161,10 +161,11 @@ export default function SiswaProfilePage() {
                 <span className="text-sm font-black text-[#A1FF00]">Aktif</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center md:text-left col-span-2 sm:col-span-1">
-                <span className="text-[10px] text-white/70 uppercase font-bold tracking-wider block">Rating</span>
-                <span className="text-sm font-black text-amber-300">5.0 ★★★★★</span>
+                <span className="text-[10px] text-white/70 uppercase font-bold tracking-wider block">Role Portal</span>
+                <span className="text-sm font-black text-[#A1FF00]">Siswa SMK</span>
               </div>
             </div>
+
           </div>
 
         </div>

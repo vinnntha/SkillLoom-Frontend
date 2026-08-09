@@ -137,29 +137,29 @@ export default function SiswaDashboardPage() {
           </div>
         </motion.div>
 
-        {/* Card 3: Rating/Badge */}
+        {/* Card 3: Accepted Applications Metric */}
         <motion.div 
           variants={itemVariants}
           className="bg-white rounded-[32px] p-7 shadow-sm border border-slate-100 flex flex-col justify-between"
         >
           <div className="space-y-1 mb-4">
-            <span className="text-slate-400 text-sm font-semibold uppercase tracking-wider block">Rating Performa</span>
+            <span className="text-slate-400 text-sm font-semibold uppercase tracking-wider block">Lamaran Diterima</span>
             <div className="flex items-end gap-3">
-              <h3 className="text-5xl font-black text-slate-900">5.0</h3>
-              <div className="flex gap-1 pb-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-5 w-5 fill-[#A1FF00] text-[#A1FF00]" />
-                ))}
-              </div>
+              <h3 className="text-5xl font-black text-[#0B38E6]">
+                {applicationsList.filter((a) => a.status === "ACCEPTED").length}
+              </h3>
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full mb-1">
+                Disetujui UMKM
+              </span>
             </div>
           </div>
 
           <div className="bg-[#0B38E6]/5 border border-[#0B38E6]/10 p-4 rounded-2xl flex items-center gap-3">
             <div className="bg-[#0B38E6] text-white p-2 rounded-xl">
-              <Star className="h-5 w-5" />
+              <Briefcase className="h-5 w-5 text-[#A1FF00]" />
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-bold uppercase">Badge Saat Ini</p>
+              <p className="text-xs text-slate-500 font-bold uppercase">Badge Vokasi</p>
               <p className="text-sm font-black text-[#0B38E6]">
                 {user?.siswaProfile?.jurusan ? `Verified ${user.siswaProfile.jurusan}` : "Verified Siswa SMK"}
               </p>
@@ -167,6 +167,7 @@ export default function SiswaDashboardPage() {
           </div>
         </motion.div>
       </div>
+
 
       {/* B. Active Workspace Section (Table/List) */}
       <motion.div 

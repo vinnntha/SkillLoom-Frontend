@@ -57,7 +57,7 @@ export default function SiswaDashboardLayout({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F4F6F9] flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center p-2 shadow-lg animate-bounce">
+        <div className="h-32 w-32 rounded-full flex items-center justify-center p-1 animate-bounce overflow-hidden">
           <img src="/logo1.png" alt="SkillLoom" className="h-full w-auto object-contain" />
         </div>
         <p className="text-xs font-bold text-slate-500 tracking-wide uppercase">Memeriksa Akses Sesi Autentikasi...</p>

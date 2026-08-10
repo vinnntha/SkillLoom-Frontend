@@ -67,8 +67,12 @@ export default function AdminDashboardLayout({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F4F6F9] flex flex-col items-center justify-center p-6 space-y-4">
-        <div className="h-16 w-16 rounded-3xl bg-[#0B38E6] flex items-center justify-center p-3 shadow-2xl shadow-[#0B38E6]/30 animate-bounce overflow-hidden border border-white/20">
-          <GraduationCap className="h-full w-full text-[#A1FF00]" />
+        <div className="h-32 w-32 rounded-full flex items-center justify-center p-1 animate-bounce overflow-hidden">
+          <img
+            src="/logo1.png"
+            alt="SkillLoom Logo"
+            className="h-full w-auto object-contain"
+          />
         </div>
         <div className="text-center space-y-1.5">
           <p className="text-xs font-black text-slate-800 tracking-wider uppercase">

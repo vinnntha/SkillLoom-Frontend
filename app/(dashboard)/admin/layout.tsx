@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
@@ -153,9 +154,15 @@ export default function AdminDashboardLayout({
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-200/80 p-6 shrink-0 h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         {/* Brand Logo Section */}
-        <div className="flex items-center gap-3 mb-8 px-1">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-[#0B38E6] to-slate-900 flex items-center justify-center p-2 shadow-xl shadow-[#0B38E6]/25 overflow-hidden shrink-0 border border-white/20">
-            <GraduationCap className="h-7 w-7 text-[#A1FF00]" />
+        <div className="flex items-center gap-2 mb-4 px-1">
+          <div>
+            <Image
+              src="/logo1.png"
+              alt="SkillLoom Logo"
+              width={110}
+              height={110}
+              className="w-full h-full object-contain"
+            />
           </div>
           <div>
             <h1 className="font-black text-xl text-slate-900 tracking-tight flex items-center gap-1.5">

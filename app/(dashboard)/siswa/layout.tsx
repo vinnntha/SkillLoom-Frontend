@@ -2,21 +2,22 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  Briefcase, 
-  LayoutDashboard, 
-  Search, 
-  Wallet, 
-  FolderGit2, 
-  User, 
-  LogOut, 
-  Menu, 
-  X, 
-  Bell, 
-  Award 
+import {
+  Briefcase,
+  LayoutDashboard,
+  Search,
+  Wallet,
+  FolderGit2,
+  User,
+  LogOut,
+  Menu,
+  X,
+  Bell,
+  Award
 } from "lucide-react";
 
 interface SidebarItem {
@@ -113,66 +114,74 @@ export default function SiswaDashboardLayout({
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 p-6 shrink-0 h-screen sticky top-0">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center p-1 shadow-md shadow-slate-900/10 overflow-hidden shrink-0 border border-slate-800">
-            <img src="/logo1.png" alt="SkillLoom Logo" className="h-full w-auto object-contain" />
-          </div>
-          <div>
-            <h1 className="font-extrabold text-lg text-slate-900 tracking-tight">SkillLoom</h1>
-            <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Siswa Dashboard</p>
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <div>
+              <Image
+                src="/logo1.png"
+                alt="SkillLoom Logo"
+                width={50}
+                height={50}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div>
+              <h1 className="font-extrabold text-lg text-slate-900 tracking-tight">SkillLoom</h1>
+              <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Siswa Dashboard</p>
+            </div>
           </div>
         </div>
 
-        {/* Profile Card Summary */}
-        <Link 
-          href="/siswa/profile" 
-          className="mb-8 p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-100 flex items-center gap-3 group cursor-pointer"
-        >
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
-              {initials}
-            </div>
-            <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-[#A1FF00] rounded-full border-2 border-white flex items-center justify-center" title="Verified Account">
-              <Award className="h-2 w-2 text-slate-900" />
-            </div>
-          </div>
-          <div className="overflow-hidden">
-            <h4 className="font-bold text-sm text-slate-800 group-hover:text-[#0B38E6] transition-colors truncate">{displayName}</h4>
-            <p className="text-xs text-slate-500 truncate">{displaySub}</p>
-          </div>
-        </Link>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 space-y-1">
-          {sidebarItems.map((item) => {
-            const isActive = pathname === item.href || (item.href === "/siswa" && pathname === "/siswa");
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
-                  isActive
-                    ? "bg-[#0B38E6] text-white shadow-lg shadow-[#0B38E6]/15 scale-[1.02]"
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                }`}
-              >
-                <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Bottom / Logout */}
-        <div className="border-t border-slate-100 pt-4 mt-auto">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+          {/* Profile Card Summary */}
+          <Link
+            href="/siswa/profile"
+            className="mb-8 p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-100 flex items-center gap-3 group cursor-pointer"
           >
-            <LogOut className="h-5 w-5" />
-            Keluar
-          </button>
-        </div>
+            <div className="relative">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
+                {initials}
+              </div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-[#A1FF00] rounded-full border-2 border-white flex items-center justify-center" title="Verified Account">
+                <Award className="h-2 w-2 text-slate-900" />
+              </div>
+            </div>
+            <div className="overflow-hidden">
+              <h4 className="font-bold text-sm text-slate-800 group-hover:text-[#0B38E6] transition-colors truncate">{displayName}</h4>
+              <p className="text-xs text-slate-500 truncate">{displaySub}</p>
+            </div>
+          </Link>
+
+          {/* Navigation Menu */}
+          <nav className="flex-1 space-y-1">
+            {sidebarItems.map((item) => {
+              const isActive = pathname === item.href || (item.href === "/siswa" && pathname === "/siswa");
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${isActive
+                      ? "bg-[#0B38E6] text-white shadow-lg shadow-[#0B38E6]/15 scale-[1.02]"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                    }`}
+                >
+                  <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Bottom / Logout */}
+          <div className="border-t border-slate-100 pt-4 mt-auto">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              Keluar
+            </button>
+          </div>
       </aside>
 
       {/* Mobile Top Header */}
@@ -185,7 +194,7 @@ export default function SiswaDashboardLayout({
             <h1 className="font-bold text-md text-slate-900">SkillLoom</h1>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <button className="relative p-2 text-slate-500 hover:text-slate-800 rounded-lg hover:bg-slate-50">
             <Bell className="h-5 w-5" />
@@ -240,11 +249,10 @@ export default function SiswaDashboardLayout({
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
-                      isActive
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${isActive
                         ? "bg-[#0B38E6] text-white"
                         : "text-slate-500 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
                     {item.name}
@@ -284,12 +292,12 @@ export default function SiswaDashboardLayout({
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
             </button>
-            
+
             {/* Divider */}
             <div className="h-6 w-px bg-slate-100"></div>
 
             {/* User Profile Header Link */}
-            <Link 
+            <Link
               href="/siswa/profile"
               className="flex items-center gap-3 group hover:opacity-80 transition-opacity cursor-pointer"
             >

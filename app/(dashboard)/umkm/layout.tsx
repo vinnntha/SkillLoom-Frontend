@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Toast, ToastType } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
@@ -151,13 +152,15 @@ export default function UmkmDashboardLayout({
       <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-100/90 p-6 shrink-0 h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         {/* Logo Section */}
         <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="h-11 w-11 rounded-2xl bg-slate-900 flex items-center justify-center p-1.5 shadow-lg shadow-slate-900/15 overflow-hidden shrink-0 border border-slate-800">
-            <img
-              src="/logo1.png"
-              alt="SkillLoom Logo"
-              className="h-full w-full object-contain drop-shadow"
-            />
-          </div>
+            <div>
+              <Image
+                src="/logo1.png"
+                alt="SkillLoom Logo"
+                width={50}
+                height={50}
+                className="w-full h-full object-contain"
+              />
+            </div>
           <div>
             <h1 className="font-extrabold text-xl text-slate-900 tracking-tight flex items-center gap-1.5">
               SkillLoom
@@ -208,27 +211,24 @@ export default function UmkmDashboardLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 group ${
-                  isActive
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-200 group ${isActive
                     ? "bg-[#0B38E6] text-white shadow-lg shadow-[#0B38E6]/20 scale-[1.01]"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`h-5 w-5 transition-transform group-hover:scale-110 ${
-                      isActive ? "text-[#A1FF00]" : "text-slate-400 group-hover:text-[#0B38E6]"
-                    }`}
+                    className={`h-5 w-5 transition-transform group-hover:scale-110 ${isActive ? "text-[#A1FF00]" : "text-slate-400 group-hover:text-[#0B38E6]"
+                      }`}
                   />
                   <span>{item.name}</span>
                 </div>
                 {item.badge && (
                   <span
-                    className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                      isActive
+                    className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isActive
                         ? "bg-[#A1FF00] text-slate-900"
                         : "bg-[#A1FF00]/20 text-[#0B38E6]"
-                    }`}
+                      }`}
                   >
                     {item.badge}
                   </span>
@@ -348,11 +348,10 @@ export default function UmkmDashboardLayout({
                     key={item.name}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
-                      isActive
+                    className={`flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-bold transition-all ${isActive
                         ? "bg-[#0B38E6] text-white"
                         : "text-slate-600 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <Icon
@@ -362,11 +361,10 @@ export default function UmkmDashboardLayout({
                     </div>
                     {item.badge && (
                       <span
-                        className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                          isActive
+                        className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${isActive
                             ? "bg-[#A1FF00] text-slate-900"
                             : "bg-[#A1FF00]/20 text-[#0B38E6]"
-                        }`}
+                          }`}
                       >
                         {item.badge}
                       </span>

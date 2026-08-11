@@ -138,7 +138,7 @@ export default function CreateProjectPage() {
 
       <div className="space-y-2">
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-          Buat Proyek Nyata Baru 🚀
+          Buat Proyek Nyata Baru
         </h1>
         <p className="text-sm text-slate-500 max-w-2xl">
           Tuliskan kebutuhan digital bisnis Anda, tentukan target jurusan SMK, dan sediakan

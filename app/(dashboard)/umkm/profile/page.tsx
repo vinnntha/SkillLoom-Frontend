@@ -94,7 +94,7 @@ export default function UmkmProfilePage() {
 
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          Profil Usaha / Brand UMKM 🏢
+          Profil Usaha / Brand UMKM
         </h1>
         <p className="text-sm text-slate-500">
           Kelola informasi nama brand, bidang industri, dan alamat kantor untuk identitas proyek.

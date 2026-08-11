@@ -242,85 +242,33 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     }
   }, [handleGoogleCredentialResponse]);
 
-  const processGoogleUser = React.useCallback(
-    async (email: string, name: string, sub: string, credentialToken?: string) => {
-      try {
-        setIsSubmitting(true);
-        showToast("Memverifikasi otentikasi Google...", "info");
+  const fallbackGoogleRedirect = () => {
+    try {
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://generous-unity-production-a8c9.up.railway.app";
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const redirectCallback = `${currentOrigin}/auth/callback`;
 
-        const googlePassword = `GoogleOAuth_${sub || "12345"}`;
-        const currentRole = userRoleRef.current;
+      const params = new URLSearchParams({
+        role: userRoleRef.current,
+        redirect_uri: redirectCallback,
+        frontend_url: currentOrigin,
+        callback_url: redirectCallback,
+        return_to: redirectCallback,
+        state: JSON.stringify({
+          role: userRoleRef.current,
+          origin: currentOrigin,
+          redirect: redirectCallback,
+        }),
+      });
 
-        let loginRes: any = null;
-
-        // 1. Coba login dengan googleLogin atau email/password
-        try {
-          loginRes = await api.auth.googleLogin({
-            token: credentialToken,
-            idToken: credentialToken,
-            credential: credentialToken,
-            role: currentRole.toUpperCase(),
-          });
-        } catch (gErr: any) {
-          try {
-            loginRes = await api.auth.login({
-              email: email,
-              password: googlePassword,
-            });
-          } catch (lErr: any) {
-            loginRes = null;
-          }
-        }
-
-        // A. JIKA SUDAH TERDAFTAR:
-        if (loginRes?.access_token) {
-          loginSuccess(loginRes.access_token, loginRes.user);
-          showToast(loginRes.message || "Berhasil masuk dengan Google!", "success");
-          const targetRole = (loginRes.user?.role || currentRole).toLowerCase();
-          setTimeout(() => {
-            if (targetRole === "siswa") router.push("/siswa");
-            else if (targetRole === "umkm") router.push("/umkm");
-            else if (targetRole === "admin" || targetRole === "guru") router.push("/admin");
-            else router.push("/siswa");
-          }, 800);
-          return;
-        }
-
-        // B. JIKA BELUM TERDAFTAR:
-        setFormData((prev) => ({
-          ...prev,
-          email: email,
-          fullName: prev.fullName || name,
-          businessName: prev.businessName || name,
-        }));
-
-        showToast(
-          `Email akun Google Anda (${email}) belum terdaftar. Anda dialihkan ke halaman pendaftaran (Daftar / Sign Up).`,
-          "error"
-        );
-        setIsSignIn(false);
-      } catch (err: any) {
-        showToast(err.message || "Gagal memproses login Google", "error");
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [loginSuccess, router, setIsSignIn]
-  );
-
-  const fallbackClientPrompt = (emailFromPrompt?: string) => {
-    setIsSubmitting(false);
-    if (formData.email || emailFromPrompt) {
-      const targetEmail = formData.email || emailFromPrompt || "";
-      processGoogleUser(targetEmail, formData.fullName || "Pengguna Google", "");
-      return;
+      window.location.href = `${baseUrl}/auth/google?${params.toString()}`;
+    } catch (err: any) {
+      showToast(err.message || "Gagal menghubungkan dengan Google", "error");
+      setIsSubmitting(false);
     }
-
-    showToast(
-      "Email Google belum terdaftar. Silakan masukkan email Anda di form pendaftaran.",
-      "error"
-    );
-    setIsSignIn(false);
   };
 
   const handleGoogleLogin = async () => {
@@ -331,53 +279,6 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
       process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
       "811455490687-4ejpv1lrk0gk3nuvgo7tdiac97c2a42s.apps.googleusercontent.com";
 
-    // 1. Coba OAuth2 Client Popup jika tersedia di Google GIS
-    if (typeof window !== "undefined" && window.google?.accounts?.oauth2) {
-      try {
-        const client = window.google.accounts.oauth2.initTokenClient({
-          client_id: googleClientId,
-          scope: "email profile openid",
-          callback: async (tokenResponse: any) => {
-            if (tokenResponse && tokenResponse.access_token) {
-              try {
-                const userRes = await fetch(
-                  "https://www.googleapis.com/oauth2/v3/userinfo",
-                  {
-                    headers: {
-                      Authorization: `Bearer ${tokenResponse.access_token}`,
-                    },
-                  }
-                );
-                const googleUser = await userRes.json();
-                if (googleUser?.email) {
-                  await processGoogleUser(
-                    googleUser.email,
-                    googleUser.name || googleUser.given_name || "Pengguna Google",
-                    googleUser.sub || "",
-                    tokenResponse.access_token
-                  );
-                  return;
-                }
-              } catch (e) {
-                console.warn("Error fetching Google userinfo:", e);
-              }
-            }
-            setIsSubmitting(false);
-          },
-          error_callback: (err: any) => {
-            console.warn("Google OAuth popup error:", err);
-            setIsSubmitting(false);
-          },
-        });
-
-        client.requestAccessToken();
-        return;
-      } catch (e) {
-        console.warn("Google oauth2 initTokenClient failed:", e);
-      }
-    }
-
-    // 2. Fallback jika One Tap ID Client tersedia
     if (typeof window !== "undefined" && window.google?.accounts?.id) {
       try {
         if (!isGsiInitializedRef.current) {
@@ -396,16 +297,16 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             notification.isSkippedMoment() ||
             notification.isDismissedMoment()
           ) {
-            fallbackClientPrompt();
+            fallbackGoogleRedirect();
           }
         });
         return;
       } catch (e) {
-        console.warn("GIS prompt failed:", e);
+        console.warn("GIS prompt failed, using fallback redirect:", e);
       }
     }
 
-    fallbackClientPrompt();
+    fallbackGoogleRedirect();
   };
 
 

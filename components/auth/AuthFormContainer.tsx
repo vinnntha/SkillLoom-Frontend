@@ -50,6 +50,25 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Form State
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    fullName: "",
+    nisn: "",
+    businessName: "",
+    phoneNumber: "",
+    schoolName: "",
+    jurusan: "",
+    jenisUsaha: "",
+    jabatan: "",
+  });
+
+  const formDataRef = React.useRef(formData);
+  React.useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
   // Toast Notification State
   const [toast, setToast] = useState<{
     isOpen: boolean;
@@ -125,28 +144,30 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             // 2. Jika akun belum ada, daftarkan otomatis sesuai peran yang dipilih
             try {
               showToast("Mendaftarkan akun Google baru...", "info");
+              const currentFormData = formDataRef.current;
+
               if (currentRole === "siswa") {
                 await api.auth.registerSiswa({
                   email: email,
                   password: googlePassword,
-                  fullName: name,
-                  nisn: sub.slice(0, 10),
-                  jurusan: "RPL",
+                  fullName: currentFormData.fullName || name,
+                  nisn: currentFormData.nisn || sub.slice(0, 10),
+                  jurusan: currentFormData.jurusan || "RPL",
                 });
               } else if (currentRole === "umkm") {
                 await api.auth.registerUmkm({
                   email: email,
                   password: googlePassword,
-                  companyName: name,
-                  industryType: "Kuliner",
-                  phoneNumber: "08" + sub.slice(0, 10),
+                  companyName: currentFormData.businessName || name,
+                  industryType: currentFormData.jenisUsaha || "Kuliner",
+                  phoneNumber: currentFormData.phoneNumber || ("08" + sub.slice(0, 10)),
                 });
               } else if (currentRole === "admin") {
                 await api.auth.registerAdmin({
                   email: email,
                   password: googlePassword,
-                  schoolName: "Sekolah SMK",
-                  position: "Guru Pembimbing",
+                  schoolName: currentFormData.schoolName || "Sekolah SMK",
+                  position: currentFormData.jabatan || "Guru Pembimbing",
                 });
               }
 
@@ -312,19 +333,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     fallbackGoogleRedirect();
   };
 
-  // Form State
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    fullName: "",
-    nisn: "",
-    businessName: "",
-    phoneNumber: "",
-    schoolName: "",
-    jurusan: "",
-    jenisUsaha: "",
-    jabatan: "",
-  });
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -929,10 +938,10 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
                       className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-[#A1FF00] focus:border-[#0B38E6] disabled:opacity-50"
                     >
                       <option value="">Pilih Jabatan</option>
-                      <option value="KepalaSekolah">Kepala Sekolah</option>
-                      <option value="Wakasek">Wakasek Hubin / Humas</option>
-                      <option value="Guru">Guru Pembimbing / Kejuruan</option>
-                      <option value="Staf">Staf Administrasi Sekolah</option>
+                      <option value="Kepala Sekolah">Kepala Sekolah</option>
+                      <option value="Wakasek Hubin / Humas">Wakasek Hubin / Humas</option>
+                      <option value="Guru Pembimbing">Guru Pembimbing / Kejuruan</option>
+                      <option value="Staf Administrasi">Staf Administrasi Sekolah</option>
                       <option value="Lainnya">Jabatan Lainnya</option>
                     </select>
                   </div>

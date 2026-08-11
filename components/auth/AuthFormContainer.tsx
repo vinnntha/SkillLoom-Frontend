@@ -380,7 +380,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             password: formData.password,
             fullName: formData.fullName,
             nisn: formData.nisn,
-            jurusan: formData.jurusan || "RPL",
+            jurusan: formData.jurusan,
           });
           showToast(res.message || "Pendaftaran Siswa berhasil! Silakan masuk.", "success");
         } else if (userRole === "umkm") {
@@ -388,7 +388,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             email: formData.email,
             password: formData.password,
             companyName: formData.businessName,
-            industryType: formData.jenisUsaha || "Kuliner",
+            industryType: formData.jenisUsaha,
             phoneNumber: formData.phoneNumber,
           });
           showToast(res.message || "Pendaftaran UMKM berhasil! Silakan masuk.", "success");
@@ -397,7 +397,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             email: formData.email,
             password: formData.password,
             schoolName: formData.schoolName,
-            position: formData.jabatan || "Guru Pembimbing",
+            position: formData.jabatan,
           });
           showToast(res.message || "Pendaftaran Admin/Guru berhasil! Silakan masuk.", "success");
         }

@@ -23,6 +23,8 @@ import {
   Layers,
   PhoneCall,
   FileText,
+  ExternalLink,
+  FileCheck,
 } from "lucide-react";
 
 export default function StudentMonitoringPage() {
@@ -425,6 +427,139 @@ export default function StudentMonitoringPage() {
                   </p>
                 </div>
               )}
+
+              {/* SECTION: Preview Update Hasil Pekerjaan Siswa & Monitoring Revisi */}
+              {(() => {
+                let sub: any = null;
+                try {
+                  const stored =
+                    localStorage.getItem(`skillloom_submission_${selectedStudent.id}`) ||
+                    localStorage.getItem(`skillloom_latest_submission`);
+                  if (stored) sub = JSON.parse(stored);
+                } catch {}
+
+                if (!sub) {
+                  sub = {
+                    submissionLink: "https://github.com/vokasi/project-demo",
+                    attachedFiles: ["Dokumentasi_Karya.pdf", "Screenshot_UI.png"],
+                    submittedAt: new Date().toISOString(),
+                    status: selectedStudent.status === "COMPLETED" ? "APPROVED" : "UNDER_REVIEW",
+                    revisionNote: "",
+                  };
+                }
+
+                return (
+                  <div className="p-4 rounded-2xl bg-[#0B38E6]/5 border border-[#0B38E6]/15 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-bold text-[#0B38E6] uppercase flex items-center gap-1">
+                        <FileCheck className="h-3.5 w-3.5" />
+                        Preview Update Hasil Karya Siswa
+                      </span>
+                      <span
+                        className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                          sub.status === "REVISION_REQUESTED"
+                            ? "bg-rose-100 text-rose-700 border border-rose-200"
+                            : sub.status === "APPROVED"
+                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                            : "bg-amber-100 text-amber-800 border border-amber-200"
+                        }`}
+                      >
+                        {sub.status === "REVISION_REQUESTED"
+                          ? "PERLU REVISI"
+                          : sub.status === "APPROVED"
+                          ? "ACC / TUNTAS"
+                          : "MENUNGGU REVIEW"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 bg-white p-3 rounded-xl border border-slate-100">
+                      <span className="text-[10px] text-slate-400 font-bold block">Tautan Karya Siswa:</span>
+                      <a
+                        href={sub.submissionLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-bold text-[#0B38E6] hover:underline flex items-center gap-1.5 break-all"
+                      >
+                        <span>{sub.submissionLink}</span>
+                        <ExternalLink className="h-3.5 w-3.5 shrink-0 text-[#0B38E6]" />
+                      </a>
+                    </div>
+
+                    {sub.attachedFiles && sub.attachedFiles.length > 0 && (
+                      <div className="text-[11px] text-slate-600 font-medium bg-white p-2.5 rounded-xl border border-slate-100">
+                        <span className="font-bold text-slate-500 block text-[10px]">Berkas Pendukung Terlampir:</span>
+                        <span className="font-semibold text-slate-800">{sub.attachedFiles.join(", ")}</span>
+                      </div>
+                    )}
+
+                    {sub.status === "REVISION_REQUESTED" && (
+                      <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs space-y-1">
+                        <span className="text-[10px] font-bold text-rose-800 uppercase block">
+                          Catatan Revisi Saat Ini:
+                        </span>
+                        <p className="text-rose-700 italic font-medium leading-relaxed">
+                          "{sub.revisionNote || "Harap sesuaikan karya dengan instruksi briefing."}"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Controls for Admin/Guru */}
+                    <div className="pt-2 border-t border-slate-200/60 space-y-2">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase block">
+                        Aksi Moderasi & Revisi Guru Pembimbing:
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const note = prompt("Masukkan catatan revisi untuk siswa:", sub.revisionNote || "Tolong lengkapi dokumentasi & perbaiki penataan layout.");
+                            if (note !== null) {
+                              const updated = {
+                                ...sub,
+                                status: "REVISION_REQUESTED",
+                                revisionNote: note,
+                                updatedAt: new Date().toISOString(),
+                              };
+                              try {
+                                localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
+                                localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
+                              } catch (e) {}
+                              setToast({
+                                isOpen: true,
+                                message: "Catatan revisi telah dikirim ke Siswa!",
+                                type: "success",
+                              });
+                            }
+                          }}
+                          className="flex-1 py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition-colors cursor-pointer"
+                        >
+                          ⚠️ Minta Revisi
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updated = {
+                              ...sub,
+                              status: "APPROVED",
+                              updatedAt: new Date().toISOString(),
+                            };
+                            try {
+                              localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
+                              localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
+                            } catch (e) {}
+                            setToast({
+                              isOpen: true,
+                              message: "Hasil karya siswa berhasil disetujui (ACC)!",
+                              type: "success",
+                            });
+                          }}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs transition-colors cursor-pointer"
+                        >
+                          ✓ ACC Pekerjaan
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">

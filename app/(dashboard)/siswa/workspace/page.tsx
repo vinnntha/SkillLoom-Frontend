@@ -54,6 +54,13 @@ export default function WorkspaceDetailPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
+  // Revision & Submission Status state
+  const [revisionInfo, setRevisionInfo] = useState<{
+    status: string;
+    note: string;
+    submittedAt?: string;
+  } | null>(null);
+
   // Load applications from API (GET /applications/my-applications)
   useEffect(() => {
     async function loadMyApplications() {
@@ -77,7 +84,7 @@ export default function WorkspaceDetailPage() {
     loadMyApplications();
   }, [user]);
 
-  // Update dynamic chat & stepper whenever selected project changes
+  // Update dynamic chat, stepper & revision info whenever selected project changes
   useEffect(() => {
     if (applications.length > 0) {
       const active = applications[selectedAppIndex] || applications[0];
@@ -115,6 +122,34 @@ export default function WorkspaceDetailPage() {
         setCurrentStep(1);
       } else if (active.status === "REJECTED") {
         setCurrentStep(1);
+      }
+
+      // Check localStorage for submission & revision status
+      const appId = active.id;
+      const projId = active.projectId || active.project?.id;
+      try {
+        const stored =
+          localStorage.getItem(`skillloom_submission_${appId}`) ||
+          localStorage.getItem(`skillloom_submission_proj_${projId}`) ||
+          localStorage.getItem(`skillloom_latest_submission`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setIsSubmitted(true);
+          if (parsed.submissionLink) setSubmissionLink(parsed.submissionLink);
+          setRevisionInfo({
+            status: parsed.status || "UNDER_REVIEW",
+            note: parsed.revisionNote || "",
+            submittedAt: parsed.submittedAt,
+          });
+
+          if (parsed.status === "APPROVED") {
+            setCurrentStep(4);
+          } else {
+            setCurrentStep(3);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed reading submission state:", e);
       }
     }
   }, [applications, selectedAppIndex, user]);
@@ -160,6 +195,36 @@ export default function WorkspaceDetailPage() {
       setIsSubmitting(false);
       setIsSubmitted(true);
       setCurrentStep(3); // Advance stepper to "Review UMKM"
+
+      const activeApp = applications[selectedAppIndex] || applications[0];
+      const appId = activeApp?.id || "default_app";
+      const projId = activeApp?.projectId || activeApp?.project?.id || "default_proj";
+
+      const submissionPayload = {
+        applicationId: appId,
+        projectId: projId,
+        studentName: user?.name || user?.siswaProfile?.fullName || "Siswa SkillLoom",
+        jurusan: user?.siswaProfile?.jurusan || "RPL",
+        submissionLink: submissionLink,
+        attachedFiles: attachedFiles.map((f) => f.name),
+        submittedAt: new Date().toISOString(),
+        status: "UNDER_REVIEW",
+        revisionNote: "",
+      };
+
+      try {
+        localStorage.setItem(`skillloom_submission_${appId}`, JSON.stringify(submissionPayload));
+        localStorage.setItem(`skillloom_submission_proj_${projId}`, JSON.stringify(submissionPayload));
+        localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(submissionPayload));
+      } catch (err) {
+        console.warn("Error saving submission to localStorage:", err);
+      }
+
+      setRevisionInfo({
+        status: "UNDER_REVIEW",
+        note: "",
+        submittedAt: submissionPayload.submittedAt,
+      });
 
       // Add message to chat about submission
       const botMessage: Message = {
@@ -358,15 +423,42 @@ export default function WorkspaceDetailPage() {
               </p>
             </div>
 
-            {isSubmitted ? (
+            {/* Revision Banner if Requested */}
+            {revisionInfo?.status === "REVISION_REQUESTED" && (
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 space-y-1.5 animate-in fade-in duration-300">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-800">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                    <span>Ada Catatan Revisi dari UMKM / Guru Pembimbing</span>
+                  </div>
+                  <span className="text-[10px] bg-rose-200 text-rose-900 px-2 py-0.5 rounded-full font-black">
+                    PERLU PERBAIKAN
+                  </span>
+                </div>
+                <p className="text-xs text-rose-700 italic font-medium pl-6 leading-relaxed">
+                  "{revisionInfo.note || "Harap perbaiki hasil karya sesuai dengan instruksi briefing."}"
+                </p>
+                <p className="text-[10px] text-rose-500 font-semibold pl-6">
+                  Silakan perbarui tautan karya atau unggah ulang file perbaikan di bawah ini.
+                </p>
+              </div>
+            )}
+
+            {isSubmitted && revisionInfo?.status !== "REVISION_REQUESTED" ? (
               <div className="bg-white rounded-2xl p-6 border border-emerald-100 text-center space-y-3 shadow-inner">
                 <div className="h-12 w-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="h-7 w-7" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-extrabold text-slate-800 text-sm">Hasil Karya Berhasil Dikirim!</h4>
+                  <h4 className="font-extrabold text-slate-800 text-sm">
+                    {revisionInfo?.status === "APPROVED"
+                      ? "Proyek Selesai & Hasil Karya Disetujui!"
+                      : "Hasil Karya Berhasil Dikirim!"}
+                  </h4>
                   <p className="text-[11px] text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    Pekerjaan Anda sedang dalam tahap review oleh pihak UMKM dan Guru Pembimbing. Anda akan mendapatkan notifikasi jika ada perbaikan.
+                    {revisionInfo?.status === "APPROVED"
+                      ? "Selamat! Pekerjaan Anda telah disetujui oleh UMKM. Dana escrow segera dicairkan ke dompet Anda."
+                      : "Pekerjaan Anda sedang dalam tahap review oleh pihak UMKM dan Guru Pembimbing. Anda akan mendapatkan notifikasi jika ada perbaikan."}
                   </p>
                 </div>
                 <button
@@ -458,7 +550,7 @@ export default function WorkspaceDetailPage() {
                       Sedang mengirimkan hasil karya...
                     </>
                   ) : (
-                    <>Kirim Hasil Karya</>
+                    <>{revisionInfo?.status === "REVISION_REQUESTED" ? "Kirim Ulang Hasil Revisi" : "Kirim Hasil Karya"}</>
                   )}
                 </button>
               </form>
@@ -494,11 +586,12 @@ export default function WorkspaceDetailPage() {
 
               {/* Step 2: Pengerjaan */}
               <div className="flex gap-4 relative">
-                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-colors duration-300 ${currentStep >= 3
-                  ? "bg-emerald-500 text-white"
-                  : "bg-[#0B38E6] text-white"
+                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-colors duration-300 ${
+                  currentStep >= 3 || revisionInfo?.status === "APPROVED"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-[#0B38E6] text-white"
                   }`}>
-                  {currentStep >= 3 ? (
+                  {currentStep >= 3 || revisionInfo?.status === "APPROVED" ? (
                     <Check className="h-4 w-4 font-bold" />
                   ) : (
                     <span className="relative flex h-2 w-2">
@@ -517,26 +610,79 @@ export default function WorkspaceDetailPage() {
 
               {/* Step 3: Review UMKM */}
               <div className="flex gap-4 relative">
-                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-all ${currentStep >= 3
-                  ? "bg-[#0B38E6] text-white animate-pulse"
-                  : "bg-slate-50 text-slate-400 border border-slate-100"
+                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 transition-all ${
+                  revisionInfo?.status === "REVISION_REQUESTED"
+                    ? "bg-rose-500 text-white"
+                    : revisionInfo?.status === "APPROVED" || currentStep >= 4
+                    ? "bg-emerald-500 text-white"
+                    : currentStep >= 3
+                    ? "bg-[#0B38E6] text-white animate-pulse"
+                    : "bg-slate-50 text-slate-400 border border-slate-100"
                   }`}>
-                  <span className="text-xs font-bold">3</span>
+                  {revisionInfo?.status === "APPROVED" || currentStep >= 4 ? (
+                    <Check className="h-4 w-4 font-bold" />
+                  ) : revisionInfo?.status === "REVISION_REQUESTED" ? (
+                    <AlertCircle className="h-4 w-4 font-bold" />
+                  ) : (
+                    <span className="text-xs font-bold">3</span>
+                  )}
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className={`text-xs font-bold ${currentStep === 3 ? "text-[#0B38E6] font-extrabold" : "text-slate-500"}`}>Review UMKM & Guru</h4>
-                  <span className="text-[10px] text-slate-400 block font-semibold">Menilai kesesuaian brief</span>
+                  <h4 className={`text-xs font-bold ${
+                    revisionInfo?.status === "REVISION_REQUESTED"
+                      ? "text-rose-600 font-extrabold"
+                      : currentStep === 3
+                      ? "text-[#0B38E6] font-extrabold"
+                      : "text-slate-800"
+                  }`}>
+                    Review UMKM & Guru
+                  </h4>
+                  <span className="text-[10px] text-slate-400 block font-semibold">
+                    {revisionInfo?.status === "REVISION_REQUESTED" ? (
+                      <span className="text-rose-600 font-bold block">
+                        ⚠️ Perlu Revisi: "{revisionInfo.note || "Lihat catatan revisi"}"
+                      </span>
+                    ) : revisionInfo?.status === "APPROVED" ? (
+                      <span className="text-emerald-600 font-bold block">
+                        ✓ Hasil Karya Disetujui!
+                      </span>
+                    ) : isSubmitted ? (
+                      <span className="text-[#0B38E6] font-bold block">
+                        Menunggu Peninjauan Hasil
+                      </span>
+                    ) : (
+                      "Menilai kesesuaian brief"
+                    )}
+                  </span>
                 </div>
               </div>
 
               {/* Step 4: Selesai */}
               <div className="flex gap-4 relative">
-                <div className="h-7 w-7 rounded-full bg-slate-50 text-slate-400 border border-slate-100 flex items-center justify-center shrink-0 shadow-sm relative z-10">
-                  <span className="text-xs font-bold">4</span>
+                <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 shadow-sm relative z-10 ${
+                  currentStep >= 4 || revisionInfo?.status === "APPROVED"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-50 text-slate-400 border border-slate-100"
+                }`}>
+                  {currentStep >= 4 || revisionInfo?.status === "APPROVED" ? (
+                    <Check className="h-4 w-4 font-bold" />
+                  ) : (
+                    <span className="text-xs font-bold">4</span>
+                  )}
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="text-xs font-bold text-slate-500">Selesai & Uang Saku Cair</h4>
-                  <span className="text-[10px] text-slate-400 block font-semibold">Tercatat di wallet & sertifikat</span>
+                  <h4 className={`text-xs font-bold ${
+                    currentStep >= 4 || revisionInfo?.status === "APPROVED"
+                      ? "text-emerald-700 font-extrabold"
+                      : "text-slate-500"
+                  }`}>
+                    Selesai & Uang Saku Cair
+                  </h4>
+                  <span className="text-[10px] text-slate-400 block font-semibold">
+                    {currentStep >= 4 || revisionInfo?.status === "APPROVED"
+                      ? "Dana Escrow telah ditransfer & Sertifikat rilis"
+                      : "Tercatat di wallet & sertifikat"}
+                  </span>
                 </div>
               </div>
 

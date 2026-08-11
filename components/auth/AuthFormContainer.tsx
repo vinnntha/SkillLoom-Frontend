@@ -386,6 +386,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
     } catch (err: any) {
       const errStr = (err?.message || "").toString().toLowerCase();
       if (
+        isSignIn ||
         errStr.includes("not found") ||
         errStr.includes("tidak ditemukan") ||
         errStr.includes("unregistered") ||
@@ -394,10 +395,13 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
         errStr.includes("cannot find") ||
         errStr.includes("404")
       ) {
-        showToast("Email Anda belum terdaftar di sistem. Silakan lakukan pendaftaran (Daftar / Sign Up) terlebih dahulu.", "error");
+        showToast(
+          "Email Anda belum terdaftar di sistem. Anda dialihkan ke halaman pendaftaran (Daftar / Sign Up).",
+          "error"
+        );
         setIsSignIn(false);
       } else {
-        showToast(err.message || "Gagal masuk. Periksa kembali email dan kata sandi Anda.", "error");
+        showToast(err.message || "Gagal melakukan pendaftaran. Silakan periksa kembali data Anda.", "error");
       }
     } finally {
       setIsSubmitting(false);

@@ -147,7 +147,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setTokenState(null);
       setUser(null);
-      throw err;
     } finally {
       setIsLoading(false);
     }

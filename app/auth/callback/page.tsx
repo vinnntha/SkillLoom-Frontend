@@ -137,12 +137,12 @@ function AuthCallbackContent() {
   }, [searchParams, router, refreshUser, loginSuccess]);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-white">
-      <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl flex flex-col items-center gap-4 text-center max-w-sm shadow-2xl">
-        <Loader2 className="w-10 h-10 text-[#A1FF00] animate-spin" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 text-slate-900 dark:text-white">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl flex flex-col items-center gap-4 text-center max-w-sm shadow-2xl">
+        <Loader2 className="w-10 h-10 text-[#0B38E6] dark:text-[#A1FF00] animate-spin" />
         <h2 className="text-lg font-bold">Memverifikasi Otentikasi Google...</h2>
-        <p className="text-xs text-slate-400">
-          Harap tunggu sebentar, kami sedang memeriksa sesi dan mengalihkan Anda.
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Harap tunggu sebentar, kami sedang memeriksa sesi dan mengalihkan Anda ke halaman pendaftaran/dashboard.
         </p>
       </div>
     </div>
@@ -153,7 +153,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white text-sm font-bold">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center text-slate-700 dark:text-white text-sm font-bold">
           Memuat...
         </div>
       }

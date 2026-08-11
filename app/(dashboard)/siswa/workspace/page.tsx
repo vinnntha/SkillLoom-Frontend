@@ -213,6 +213,12 @@ export default function WorkspaceDetailPage() {
       };
 
       try {
+        api.applications.submitDeliverable(appId, { submissionLink }).catch((err) => {
+          console.warn("Backend API submit endpoint fallback:", err);
+        });
+      } catch (e) {}
+
+      try {
         localStorage.setItem(`skillloom_submission_${appId}`, JSON.stringify(submissionPayload));
         localStorage.setItem(`skillloom_submission_proj_${projId}`, JSON.stringify(submissionPayload));
         localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(submissionPayload));

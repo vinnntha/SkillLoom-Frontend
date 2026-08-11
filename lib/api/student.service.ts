@@ -116,4 +116,17 @@ export const studentService = {
   async getShowcases(featured?: boolean): Promise<ShowcaseItem[]> {
     return fetcher<ShowcaseItem[]>(`/showcases${featured ? "?featured=true" : ""}`);
   },
+
+  /**
+   * Submit deliverable work link (POST /applications/:id/submit)
+   */
+  async submitDeliverable(
+    applicationId: string,
+    payload: { submissionLink: string }
+  ): Promise<any> {
+    return fetcher<any>(`/applications/${applicationId}/submit`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 };

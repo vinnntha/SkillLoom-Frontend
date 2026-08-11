@@ -120,6 +120,19 @@ export const adminService = {
   },
 
   /**
+   * Update revision note or review status (PATCH /applications/:id/revision)
+   */
+  async updateRevisionStatus(
+    applicationId: string,
+    payload: { reviewStatus: string; revisionNote?: string }
+  ): Promise<any> {
+    return adminFetcher<any>(`/applications/${applicationId}/revision`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
    * Get all transactions for admin audit (GET /transactions or GET /transactions/my)
    */
   async getAllTransactions(): Promise<TransactionItem[]> {

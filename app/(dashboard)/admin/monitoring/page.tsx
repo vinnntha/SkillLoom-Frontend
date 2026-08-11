@@ -520,6 +520,14 @@ export default function StudentMonitoringPage() {
                                 updatedAt: new Date().toISOString(),
                               };
                               try {
+                                adminService.updateRevisionStatus(selectedStudent.id, {
+                                  reviewStatus: "REVISION_REQUESTED",
+                                  revisionNote: note,
+                                }).catch((err) => {
+                                  console.warn("Backend API revision endpoint fallback:", err);
+                                });
+                              } catch (e) {}
+                              try {
                                 localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
                                 localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
                               } catch (e) {}
@@ -541,6 +549,13 @@ export default function StudentMonitoringPage() {
                               status: "APPROVED",
                               updatedAt: new Date().toISOString(),
                             };
+                            try {
+                              adminService.updateRevisionStatus(selectedStudent.id, {
+                                reviewStatus: "APPROVED",
+                              }).catch((err) => {
+                                console.warn("Backend API revision endpoint fallback:", err);
+                              });
+                            } catch (e) {}
                             try {
                               localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
                               localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));

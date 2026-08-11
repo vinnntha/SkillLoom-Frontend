@@ -108,7 +108,7 @@ export const api = {
         body: JSON.stringify(payload),
       }),
 
-    googleLogin: (payload: { idToken?: string; credential?: string; role?: string }) =>
+    googleLogin: (payload: { token?: string; idToken?: string; credential?: string; role?: string }) =>
       request<{ message: string; access_token: string; user: any }>("/auth/google", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -216,6 +216,21 @@ export const api = {
       request<any>(`/applications/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
+      }),
+
+    submitDeliverable: (id: string, payload: { submissionLink: string }) =>
+      request<any>(`/applications/${id}/submit`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    updateRevision: (
+      id: string,
+      payload: { reviewStatus: string; revisionNote?: string }
+    ) =>
+      request<any>(`/applications/${id}/revision`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
       }),
   },
 

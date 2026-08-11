@@ -123,6 +123,19 @@ export const umkmApi = {
     });
   },
 
+  /**
+   * Update revision note or review status (PATCH /applications/:id/revision)
+   */
+  async updateRevisionStatus(
+    applicationId: string,
+    payload: { reviewStatus: string; revisionNote?: string }
+  ): Promise<any> {
+    return fetcher<any>(`/applications/${applicationId}/revision`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+
   // ==========================================
   // ESCROW TRANSACTIONS ENDPOINTS
   // ==========================================

@@ -105,7 +105,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
       if (response?.credential) {
         try {
           setIsSubmitting(true);
-          showToast("Memverifikasi data Google...", "info");
+          showToast("Memverifikasi otentikasi Google...", "info");
 
           // Decode JWT ID Token payload client-side
           const base64Url = response.credential.split(".")[1];
@@ -122,9 +122,8 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
           const googleUser = JSON.parse(jsonPayload);
 
           const email = googleUser?.email;
-          const name =
-            googleUser?.name || googleUser?.given_name || "Pengguna Google";
-          const sub = googleUser?.sub || "12345678";
+          const name = googleUser?.name || googleUser?.given_name || "Pengguna Google";
+          const sub = googleUser?.sub || "";
           const googlePassword = `GoogleOAuth_${sub}`;
           const currentRole = userRoleRef.current;
 
@@ -134,63 +133,27 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
 
           let loginRes: any = null;
 
-          // 1. Coba login dengan kredensial Google
+          // 1. Coba login dengan Google API endpoint atau kredensial Google
           try {
-            loginRes = await api.auth.login({
-              email: email,
-              password: googlePassword,
+            loginRes = await api.auth.googleLogin({
+              token: response.credential,
+              idToken: response.credential,
+              credential: response.credential,
+              role: currentRole.toUpperCase(),
             });
-          } catch (loginErr: any) {
-            // 2. Jika akun belum ada, daftarkan otomatis sesuai peran yang dipilih
+          } catch (gErr: any) {
             try {
-              showToast("Mendaftarkan akun Google baru...", "info");
-              const currentFormData = formDataRef.current;
-
-              if (currentRole === "siswa") {
-                await api.auth.registerSiswa({
-                  email: email,
-                  password: googlePassword,
-                  fullName: currentFormData.fullName || name,
-                  nisn: currentFormData.nisn || sub.slice(0, 10),
-                  jurusan: currentFormData.jurusan || "RPL",
-                });
-              } else if (currentRole === "umkm") {
-                await api.auth.registerUmkm({
-                  email: email,
-                  password: googlePassword,
-                  companyName: currentFormData.businessName || name,
-                  industryType: currentFormData.jenisUsaha || "Kuliner",
-                  phoneNumber: currentFormData.phoneNumber || ("08" + sub.slice(0, 10)),
-                });
-              } else if (currentRole === "admin") {
-                await api.auth.registerAdmin({
-                  email: email,
-                  password: googlePassword,
-                  schoolName: currentFormData.schoolName || "Sekolah SMK",
-                  position: currentFormData.jabatan || "Guru Pembimbing",
-                });
-              }
-
               loginRes = await api.auth.login({
                 email: email,
                 password: googlePassword,
               });
-            } catch (regErr: any) {
-              const regErrMsg = (regErr?.message || "").toString();
-              if (
-                regErrMsg.includes("terdaftar") ||
-                regErrMsg.includes("already exists")
-              ) {
-                showToast(
-                  "Email Google ini sudah terdaftar. Silakan masuk menggunakan email dan password manual.",
-                  "error"
-                );
-                return;
-              }
-              throw regErr;
+            } catch (lErr: any) {
+              loginRes = null;
             }
           }
 
+          // A. JIKA EMAIL SUDAH TERDAFTAR & LOGIN BERHASIL:
+          // Fetch data pengguna resmi yang terdaftar, JANGAN buat data baru!
           if (loginRes?.access_token) {
             loginSuccess(loginRes.access_token, loginRes.user);
             showToast(
@@ -209,6 +172,22 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
             }, 800);
             return;
           }
+
+          // B. JIKA EMAIL BELUM TERDAFTAR:
+          // JANGAN membuat data baru otomatis. Minta pengguna registrasi terlebih dahulu!
+          setFormData((prev) => ({
+            ...prev,
+            email: email,
+            fullName: prev.fullName || name,
+            businessName: prev.businessName || name,
+          }));
+
+          showToast(
+            `Email akun Google Anda (${email}) belum terdaftar. Silakan lakukan pendaftaran (Daftar / Sign Up) terlebih dahulu.`,
+            "error"
+          );
+          setIsSignIn(false);
+
         } catch (err: any) {
           showToast(
             err.message || "Gagal memproses otentikasi Google",
@@ -221,7 +200,7 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
         setIsSubmitting(false);
       }
     },
-    [loginSuccess, router]
+    [loginSuccess, router, setIsSignIn]
   );
 
   // Load Google GIS Script dynamically

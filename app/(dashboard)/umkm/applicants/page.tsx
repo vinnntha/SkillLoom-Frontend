@@ -341,6 +341,14 @@ export default function UmkmApplicantsPage() {
                                     updatedAt: new Date().toISOString(),
                                   };
                                   try {
+                                    umkmApi.updateRevisionStatus(app.id, {
+                                      reviewStatus: "REVISION_REQUESTED",
+                                      revisionNote: note,
+                                    }).catch((err) => {
+                                      console.warn("Backend API revision endpoint fallback:", err);
+                                    });
+                                  } catch (e) {}
+                                  try {
                                     localStorage.setItem(`skillloom_submission_${app.id}`, JSON.stringify(updated));
                                     localStorage.setItem(`skillloom_submission_proj_${app.projectId}`, JSON.stringify(updated));
                                     localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
@@ -363,6 +371,13 @@ export default function UmkmApplicantsPage() {
                                   status: "APPROVED",
                                   updatedAt: new Date().toISOString(),
                                 };
+                                try {
+                                  umkmApi.updateRevisionStatus(app.id, {
+                                    reviewStatus: "APPROVED",
+                                  }).catch((err) => {
+                                    console.warn("Backend API revision endpoint fallback:", err);
+                                  });
+                                } catch (e) {}
                                 try {
                                   localStorage.setItem(`skillloom_submission_${app.id}`, JSON.stringify(updated));
                                   localStorage.setItem(`skillloom_submission_proj_${app.projectId}`, JSON.stringify(updated));

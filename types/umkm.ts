@@ -53,6 +53,9 @@ export interface ApplicationItem {
   siswaId: string;
   pitchMessage: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED";
+  submissionLink?: string;
+  revisionNote?: string;
+  reviewStatus?: "UNDER_REVIEW" | "REVISION_REQUESTED" | "APPROVED" | string;
   createdAt: string;
   updatedAt?: string;
   project?: ProjectItem;

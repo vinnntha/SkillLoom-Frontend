@@ -248,19 +248,26 @@ export const AuthFormContainer: React.FC<AuthFormContainerProps> = ({
         process.env.NEXT_PUBLIC_API_URL ||
         "https://generous-unity-production-a8c9.up.railway.app";
       const currentOrigin =
-        typeof window !== "undefined" ? window.location.origin : "";
+        typeof window !== "undefined" ? window.location.origin : "https://skillloom.web.id";
       const redirectCallback = `${currentOrigin}/auth/callback`;
 
       const params = new URLSearchParams({
         role: userRoleRef.current,
-        redirect_uri: redirectCallback,
+        frontendUrl: currentOrigin,
         frontend_url: currentOrigin,
+        redirectUrl: redirectCallback,
+        redirect_url: redirectCallback,
+        redirect_uri: redirectCallback,
+        callbackUrl: redirectCallback,
         callback_url: redirectCallback,
         return_to: redirectCallback,
+        returnUrl: redirectCallback,
+        origin: currentOrigin,
         state: JSON.stringify({
           role: userRoleRef.current,
           origin: currentOrigin,
           redirect: redirectCallback,
+          frontendUrl: currentOrigin,
         }),
       });
 

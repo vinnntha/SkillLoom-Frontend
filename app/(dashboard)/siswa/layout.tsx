@@ -132,56 +132,56 @@ export default function SiswaDashboardLayout({
         </div>
 
 
-          {/* Profile Card Summary */}
-          <Link
-            href="/siswa/profile"
-            className="mb-8 p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-100 flex items-center gap-3 group cursor-pointer"
-          >
-            <div className="relative">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
-                {initials}
-              </div>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-[#A1FF00] rounded-full border-2 border-white flex items-center justify-center" title="Verified Account">
-                <Award className="h-2 w-2 text-slate-900" />
-              </div>
+        {/* Profile Card Summary */}
+        <Link
+          href="/siswa/profile"
+          className="mb-8 p-4 bg-slate-50 hover:bg-slate-100/80 transition-colors rounded-2xl border border-slate-100 flex items-center gap-3 group cursor-pointer"
+        >
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#0B38E6] to-[#60a5fa] flex items-center justify-center text-white font-bold text-sm">
+              {initials}
             </div>
-            <div className="overflow-hidden">
-              <h4 className="font-bold text-sm text-slate-800 group-hover:text-[#0B38E6] transition-colors truncate">{displayName}</h4>
-              <p className="text-xs text-slate-500 truncate">{displaySub}</p>
+            <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-[#A1FF00] rounded-full border-2 border-white flex items-center justify-center" title="Verified Account">
+              <Award className="h-2 w-2 text-slate-900" />
             </div>
-          </Link>
-
-          {/* Navigation Menu */}
-          <nav className="flex-1 space-y-1">
-            {sidebarItems.map((item) => {
-              const isActive = pathname === item.href || (item.href === "/siswa" && pathname === "/siswa");
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${isActive
-                      ? "bg-[#0B38E6] text-white shadow-lg shadow-[#0B38E6]/15 scale-[1.02]"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
-                    }`}
-                >
-                  <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Bottom / Logout */}
-          <div className="border-t border-slate-100 pt-4 mt-auto">
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
-            >
-              <LogOut className="h-5 w-5" />
-              Keluar
-            </button>
           </div>
+          <div className="overflow-hidden">
+            <h4 className="font-bold text-sm text-slate-800 group-hover:text-[#0B38E6] transition-colors truncate">{displayName}</h4>
+            <p className="text-xs text-slate-500 truncate">{displaySub}</p>
+          </div>
+        </Link>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 space-y-1">
+          {sidebarItems.map((item) => {
+            const isActive = pathname === item.href || (item.href === "/siswa" && pathname === "/siswa");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${isActive
+                  ? "bg-[#0B38E6] text-white shadow-lg shadow-[#0B38E6]/15 scale-[1.02]"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
+                  }`}
+              >
+                <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom / Logout */}
+        <div className="border-t border-slate-100 pt-4 mt-auto">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+          >
+            <LogOut className="h-5 w-5" />
+            Keluar
+          </button>
+        </div>
       </aside>
 
       {/* Mobile Top Header */}
@@ -250,8 +250,8 @@ export default function SiswaDashboardLayout({
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${isActive
-                        ? "bg-[#0B38E6] text-white"
-                        : "text-slate-500 hover:bg-slate-50"
+                      ? "bg-[#0B38E6] text-white"
+                      : "text-slate-500 hover:bg-slate-50"
                       }`}
                   >
                     <Icon className={`h-5 w-5 ${isActive ? "text-[#A1FF00]" : ""}`} />
@@ -288,9 +288,19 @@ export default function SiswaDashboardLayout({
           </div>
           <div className="flex items-center gap-6">
             {/* Notification Badge */}
-            <button className="relative p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50 transition-colors">
+            <button
+              onClick={() =>
+                setToast({
+                  isOpen: true,
+                  message: "Tidak ada notifikasi verifikasi dari UMKM",
+                  type: "info",
+                })
+              }
+              className="relative p-2.5 text-slate-400 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer"
+              title="Notifikasi"
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-2 right-2 h-2 w-2 bg-[#A1FF00] rounded-full border border-white"></span>
             </button>
 
             {/* Divider */}

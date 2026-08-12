@@ -29,7 +29,7 @@ export const Navbar: React.FC = () => {
         >
           <motion.div 
             className="relative h-10 sm:h-12 w-auto flex items-center justify-center"
-            whileHover={{ rotate: [0, -5, 5, -2, 0] }}
+            whileHover={{ rotate: [0, 0, 5, -2, 0] }}
             transition={{ duration: 0.4 }}
           >
             {/* User's uploaded logo image */}

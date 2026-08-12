@@ -130,22 +130,23 @@ export default function WorkspaceDetailPage() {
       try {
         const stored =
           localStorage.getItem(`skillloom_submission_${appId}`) ||
-          localStorage.getItem(`skillloom_submission_proj_${projId}`) ||
-          localStorage.getItem(`skillloom_latest_submission`);
+          (projId ? localStorage.getItem(`skillloom_submission_proj_${projId}`) : null);
         if (stored) {
           const parsed = JSON.parse(stored);
-          setIsSubmitted(true);
-          if (parsed.submissionLink) setSubmissionLink(parsed.submissionLink);
-          setRevisionInfo({
-            status: parsed.status || "UNDER_REVIEW",
-            note: parsed.revisionNote || "",
-            submittedAt: parsed.submittedAt,
-          });
+          if (parsed.applicationId === appId || !parsed.applicationId) {
+            setIsSubmitted(true);
+            if (parsed.submissionLink) setSubmissionLink(parsed.submissionLink);
+            setRevisionInfo({
+              status: parsed.status || "UNDER_REVIEW",
+              note: parsed.revisionNote || "",
+              submittedAt: parsed.submittedAt,
+            });
 
-          if (parsed.status === "APPROVED") {
-            setCurrentStep(4);
-          } else {
-            setCurrentStep(3);
+            if (parsed.status === "APPROVED") {
+              setCurrentStep(4);
+            } else {
+              setCurrentStep(3);
+            }
           }
         }
       } catch (e) {

@@ -91,10 +91,40 @@ export const authService = {
    * Register a new Siswa account (POST /auth/register/siswa)
    */
   async registerSiswa(payload: RegisterSiswaPayload): Promise<AuthResponse> {
-    return fetcher<AuthResponse>("/auth/register/siswa", {
+    const res = await fetcher<AuthResponse>("/auth/register/siswa", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("skillloom_registered_students");
+        const list: any[] = stored ? JSON.parse(stored) : [];
+        const studentProfile: any = res.user?.siswaProfile || {
+          fullName: payload.fullName,
+          nisn: payload.nisn,
+          jurusan: payload.jurusan,
+        };
+        const newStudent = {
+          id: res.user?.id || `reg-${Date.now()}`,
+          siswaId: studentProfile.id || res.user?.id || `siswa-${Date.now()}`,
+          fullName: studentProfile.fullName || payload.fullName,
+          nisn: studentProfile.nisn || payload.nisn,
+          jurusan: studentProfile.jurusan || payload.jurusan,
+          email: payload.email,
+          registeredAt: res.user?.createdAt || new Date().toISOString(),
+        };
+        const filtered = list.filter(
+          (s: any) => s.nisn !== newStudent.nisn && s.email !== newStudent.email
+        );
+        filtered.push(newStudent);
+        localStorage.setItem("skillloom_registered_students", JSON.stringify(filtered));
+      } catch (e) {
+        console.warn("Failed to cache registered student:", e);
+      }
+    }
+
+    return res;
   },
 
   /**

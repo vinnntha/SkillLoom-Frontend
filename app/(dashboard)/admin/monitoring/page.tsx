@@ -35,6 +35,13 @@ export default function StudentMonitoringPage() {
   const [selectedJurusan, setSelectedJurusan] = useState("Semua");
   const [selectedStatus, setSelectedStatus] = useState("Semua");
   const [selectedStudent, setSelectedStudent] = useState<StudentMonitoringItem | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newStudent, setNewStudent] = useState({
+    fullName: "",
+    nisn: "",
+    jurusan: "",
+    email: "",
+  });
 
   const [toast, setToast] = useState<{
     isOpen: boolean;
@@ -62,9 +69,7 @@ export default function StudentMonitoringPage() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-
   };
-
 
   useEffect(() => {
     fetchStudents();
@@ -75,7 +80,34 @@ export default function StudentMonitoringPage() {
     fetchStudents();
   };
 
+  const handleAddStudentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newStudent.fullName || !newStudent.nisn) {
+      setToast({
+        isOpen: true,
+        message: "Nama Lengkap dan NISN wajib diisi!",
+        type: "error",
+      });
+      return;
+    }
+
+    adminService.syncRegisteredStudent(newStudent);
+    setToast({
+      isOpen: true,
+      message: `Akun siswa "${newStudent.fullName}" berhasil disinkronkan ke monitoring!`,
+      type: "success",
+    });
+    setNewStudent({ fullName: "", nisn: "", jurusan: "RPL", email: "" });
+    setIsAddModalOpen(false);
+    fetchStudents();
+  };
+
   const jurusanList = ["Semua", "RPL", "TKJ", "DKV", "Multimedia", "AKL"];
+  const statusList = [
+    { label: "Semua Status", value: "Semua" },
+    { label: "Sedang Dikerjakan (Aktif)", value: "Aktif" },
+    { label: "Selesai (Tuntas)", value: "Tuntas" },
+  ];
 
   const filteredStudents = students.filter((s) => {
     const matchesSearch =
@@ -90,9 +122,8 @@ export default function StudentMonitoringPage() {
 
     const matchesStatus =
       selectedStatus === "Semua" ||
-      (selectedStatus === "Aktif" && s.status === "IN_PROGRESS") ||
+      (selectedStatus === "Aktif" && (s.status === "IN_PROGRESS" || s.status === "OPEN")) ||
       (selectedStatus === "Tuntas" && s.status === "COMPLETED");
-
 
     return matchesSearch && matchesJurusan && matchesStatus;
   });
@@ -139,22 +170,37 @@ export default function StudentMonitoringPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-black text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
-          >
-            <RefreshCw
-              className={`h-4 w-4 text-[#A1FF00] ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span>Refresh Progres</span>
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-[#A1FF00] hover:bg-[#8fe600] text-slate-950 text-xs font-black transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#A1FF00]/20"
+            >
+              <Users className="h-4 w-4" />
+              <span>+ Tambah / Sinkron Siswa</span>
+            </button>
+
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-black text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-4 w-4 text-[#A1FF00] ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* COUNTER CARDS SUMMARY */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => setSelectedStatus("Semua")}
+          className={`p-6 rounded-[28px] bg-white border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${
+            selectedStatus === "Semua" ? "border-[#0B38E6] ring-2 ring-[#0B38E6]/20" : "border-slate-200/80"
+          }`}
+        >
           <div>
             <span className="text-xs font-mono font-bold text-slate-400 uppercase">
               Total Siswa Terdaftar Proyek
@@ -163,7 +209,7 @@ export default function StudentMonitoringPage() {
               {students.length} Siswa
             </h3>
             <span className="text-[11px] text-emerald-600 font-bold mt-1 block">
-              100% Aktif Terikat Kontrak
+              100% Terverifikasi Supervisi
             </span>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-[#0B38E6]/10 flex items-center justify-center text-[#0B38E6]">
@@ -171,13 +217,18 @@ export default function StudentMonitoringPage() {
           </div>
         </div>
 
-        <div className="p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => setSelectedStatus("Aktif")}
+          className={`p-6 rounded-[28px] bg-white border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${
+            selectedStatus === "Aktif" ? "border-amber-500 ring-2 ring-amber-500/20" : "border-slate-200/80"
+          }`}
+        >
           <div>
             <span className="text-xs font-mono font-bold text-slate-400 uppercase">
               Proyek In-Progress
             </span>
             <h3 className="text-3xl font-black text-slate-900 mt-1">
-              {students.filter((s) => s.status === "IN_PROGRESS").length} Proyek
+              {students.filter((s) => s.status === "IN_PROGRESS" || s.status === "OPEN").length} Proyek
             </h3>
             <span className="text-[11px] text-amber-600 font-bold mt-1 block">
               Sedang Dikerjakan Siswa
@@ -188,7 +239,12 @@ export default function StudentMonitoringPage() {
           </div>
         </div>
 
-        <div className="p-6 rounded-[28px] bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div
+          onClick={() => setSelectedStatus("Tuntas")}
+          className={`p-6 rounded-[28px] bg-white border shadow-sm flex items-center justify-between cursor-pointer transition-all hover:shadow-md ${
+            selectedStatus === "Tuntas" ? "border-emerald-500 ring-2 ring-emerald-500/20" : "border-slate-200/80"
+          }`}
+        >
           <div>
             <span className="text-xs font-mono font-bold text-slate-400 uppercase">
               Proyek Tuntas
@@ -221,23 +277,40 @@ export default function StudentMonitoringPage() {
             />
           </div>
 
-          {/* Jurusan Filter */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <span className="text-xs font-bold text-slate-400 shrink-0">Jurusan:</span>
-            {jurusanList.map((j) => (
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            {statusList.map((st) => (
               <button
-                key={j}
-                onClick={() => setSelectedJurusan(j)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                  selectedJurusan === j
+                key={st.value}
+                onClick={() => setSelectedStatus(st.value)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                  selectedStatus === st.value
                     ? "bg-[#0B38E6] text-white shadow-md shadow-[#0B38E6]/20"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
-                {j}
+                {st.label}
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Jurusan Filter */}
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 overflow-x-auto">
+          <span className="text-xs font-bold text-slate-400 shrink-0">Filter Jurusan:</span>
+          {jurusanList.map((j) => (
+            <button
+              key={j}
+              onClick={() => setSelectedJurusan(j)}
+              className={`px-3.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                selectedJurusan === j
+                  ? "bg-slate-900 text-[#A1FF00]"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {j}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -585,6 +658,119 @@ export default function StudentMonitoringPage() {
                 Selesai Memeriksa
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / SYNC REGISTERED STUDENT */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white max-w-md w-full rounded-[32px] p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-10 w-10 rounded-2xl bg-[#0B38E6] flex items-center justify-center text-[#A1FF00]">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    Sinkronkan Akun Siswa
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Tambahkan data akun siswa yang telah terdaftar
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl"
+              >
+                <XCircle className="h-6 w-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddStudentSubmit} className="space-y-3.5 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[10px]">
+                  Nama Lengkap Siswa:
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Budi Santoso"
+                  value={newStudent.fullName}
+                  onChange={(e) =>
+                    setNewStudent((prev) => ({ ...prev, fullName: e.target.value }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0B38E6]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[10px]">
+                  NISN (Nomor Induk Siswa Nasional):
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: 0054321098"
+                  value={newStudent.nisn}
+                  onChange={(e) =>
+                    setNewStudent((prev) => ({ ...prev, nisn: e.target.value }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0B38E6]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[10px]">
+                  Kategori Jurusan:
+                </label>
+                <select
+                  value={newStudent.jurusan}
+                  onChange={(e) =>
+                    setNewStudent((prev) => ({ ...prev, jurusan: e.target.value }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0B38E6]"
+                >
+                  <option value="RPL">RPL (Rekayasa Perangkat Lunak)</option>
+                  <option value="TKJ">TKJ (Teknik Komputer Jaringan)</option>
+                  <option value="DKV">DKV (Desain Komunikasi Visual)</option>
+                  <option value="Multimedia">Multimedia</option>
+                  <option value="AKL">AKL (Akuntansi & Keuangan)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase text-[10px]">
+                  Email Siswa (Opsional):
+                </label>
+                <input
+                  type="email"
+                  placeholder="siswa@example.com"
+                  value={newStudent.email}
+                  onChange={(e) =>
+                    setNewStudent((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#0B38E6]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-[#0B38E6] hover:bg-blue-700 text-white font-black text-xs cursor-pointer"
+                >
+                  Simpan & Tampilkan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

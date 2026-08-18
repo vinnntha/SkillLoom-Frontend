@@ -134,6 +134,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (typeof window !== "undefined") {
         localStorage.setItem("user", JSON.stringify(mergedUserObj));
+        if (normUser.role === "siswa" && normUser.siswaProfile) {
+          try {
+            const stored = localStorage.getItem("skillloom_registered_students");
+            const list: any[] = stored ? JSON.parse(stored) : [];
+            const newStudent = {
+              id: normUser.id,
+              siswaId: normUser.siswaProfile.id || normUser.id,
+              fullName: normUser.siswaProfile.fullName || normUser.name,
+              nisn: normUser.siswaProfile.nisn || "-",
+              jurusan: normUser.siswaProfile.jurusan || "RPL",
+              email: normUser.email,
+              registeredAt: new Date().toISOString(),
+            };
+            const filtered = list.filter(
+              (s: any) => s.nisn !== newStudent.nisn && s.email !== newStudent.email
+            );
+            filtered.push(newStudent);
+            localStorage.setItem("skillloom_registered_students", JSON.stringify(filtered));
+          } catch (e) {}
+        }
       }
 
       setUser(normUser);
@@ -161,6 +181,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTokenState(access_token);
     if (userRaw && typeof window !== "undefined") {
       localStorage.setItem("user", JSON.stringify(userRaw));
+      if (
+        (userRaw.role?.toString().toLowerCase() === "siswa" ||
+          userRaw.role === "SISWA") &&
+        userRaw.siswaProfile
+      ) {
+        try {
+          const stored = localStorage.getItem("skillloom_registered_students");
+          const list: any[] = stored ? JSON.parse(stored) : [];
+          const newStudent = {
+            id: userRaw.id || userRaw._id || userRaw.sub,
+            siswaId: userRaw.siswaProfile.id || userRaw.id,
+            fullName: userRaw.siswaProfile.fullName || userRaw.name,
+            nisn: userRaw.siswaProfile.nisn || "-",
+            jurusan: userRaw.siswaProfile.jurusan || "RPL",
+            email: userRaw.email,
+            registeredAt: new Date().toISOString(),
+          };
+          const filtered = list.filter(
+            (s: any) => s.nisn !== newStudent.nisn && s.email !== newStudent.email
+          );
+          filtered.push(newStudent);
+          localStorage.setItem("skillloom_registered_students", JSON.stringify(filtered));
+        } catch (e) {}
+      }
     }
     const normUser = normalizeUser(userRaw);
     setUser(normUser);

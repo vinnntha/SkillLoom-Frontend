@@ -226,11 +226,30 @@ export const api = {
   // APPLICATIONS ENDPOINTS
   // ==========================================
   applications: {
-    apply: (payload: { projectId: string; pitchMessage: string }) =>
-      request<any>("/applications", {
+    apply: async (payload: { projectId: string; pitchMessage: string }) => {
+      const res = await request<any>("/applications", {
         method: "POST",
         body: JSON.stringify(payload),
-      }),
+      });
+
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("skillloom_registered_applications");
+          const list: any[] = stored ? JSON.parse(stored) : [];
+          list.push({
+            id: res?.id || res?._id || `app-${Date.now()}`,
+            projectId: payload.projectId,
+            siswaId: res?.siswaId || res?.siswa?.id,
+            siswa: res?.siswa,
+            pitchMessage: payload.pitchMessage,
+            appliedAt: new Date().toISOString(),
+          });
+          localStorage.setItem("skillloom_registered_applications", JSON.stringify(list));
+        } catch (e) {}
+      }
+
+      return res;
+    },
 
     getMyApplications: async () => {
       try {

@@ -533,18 +533,22 @@ export default function StudentMonitoringPage() {
                 try {
                   const stored =
                     localStorage.getItem(`skillloom_submission_${selectedStudent.id}`) ||
+                    localStorage.getItem(`skillloom_submission_${selectedStudent.siswaId}`) ||
                     localStorage.getItem(`skillloom_latest_submission`);
                   if (stored) sub = JSON.parse(stored);
                 } catch {}
 
-                if (!sub) {
-                  sub = {
-                    submissionLink: "https://github.com/vokasi/project-demo",
-                    attachedFiles: ["Dokumentasi_Karya.pdf", "Screenshot_UI.png"],
-                    submittedAt: new Date().toISOString(),
-                    status: selectedStudent.status === "COMPLETED" ? "APPROVED" : "UNDER_REVIEW",
-                    revisionNote: "",
-                  };
+                if (!sub || !sub.submissionLink) {
+                  return (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1.5">
+                      <span className="text-[10px] font-mono font-bold text-slate-400 uppercase block">
+                        Status Pengunggahan Karya Siswa
+                      </span>
+                      <p className="text-xs font-semibold text-slate-600">
+                        Siswa belum mengunggah tautan pekerjaan / berkas deliverable untuk proyek ini.
+                      </p>
+                    </div>
+                  );
                 }
 
                 return (
@@ -552,7 +556,7 @@ export default function StudentMonitoringPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono font-bold text-[#0B38E6] uppercase flex items-center gap-1">
                         <FileCheck className="h-3.5 w-3.5" />
-                        Preview Update Hasil Karya Siswa
+                        Update Hasil Karya Siswa
                       </span>
                       <span
                         className={`text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full ${
@@ -619,14 +623,6 @@ export default function StudentMonitoringPage() {
                                 updatedAt: new Date().toISOString(),
                               };
                               try {
-                                adminService.updateRevisionStatus(selectedStudent.id, {
-                                  reviewStatus: "REVISION_REQUESTED",
-                                  revisionNote: note,
-                                }).catch((err) => {
-                                  console.warn("Backend API revision endpoint fallback:", err);
-                                });
-                              } catch (e) {}
-                              try {
                                 localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
                                 localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
                               } catch (e) {}
@@ -648,13 +644,6 @@ export default function StudentMonitoringPage() {
                               status: "APPROVED",
                               updatedAt: new Date().toISOString(),
                             };
-                            try {
-                              adminService.updateRevisionStatus(selectedStudent.id, {
-                                reviewStatus: "APPROVED",
-                              }).catch((err) => {
-                                console.warn("Backend API revision endpoint fallback:", err);
-                              });
-                            } catch (e) {}
                             try {
                               localStorage.setItem(`skillloom_submission_${selectedStudent.id}`, JSON.stringify(updated));
                               localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));

@@ -85,10 +85,28 @@ export const studentService = {
    * Apply for a project bounty as a Siswa (POST /applications)
    */
   async applyProject(payload: ApplyProjectPayload): Promise<ApplicationItem> {
-    return fetcher<ApplicationItem>("/applications", {
+    const res = await fetcher<ApplicationItem>("/applications", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("skillloom_registered_applications");
+        const list: any[] = stored ? JSON.parse(stored) : [];
+        list.push({
+          id: (res as any)?.id || (res as any)?._id || `app-${Date.now()}`,
+          projectId: payload.projectId,
+          siswaId: (res as any)?.siswaId || (res as any)?.siswa?.id,
+          siswa: (res as any)?.siswa,
+          pitchMessage: payload.pitchMessage,
+          appliedAt: new Date().toISOString(),
+        });
+        localStorage.setItem("skillloom_registered_applications", JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    return res;
   },
 
   /**

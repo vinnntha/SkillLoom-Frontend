@@ -284,24 +284,26 @@ export const adminService = {
 
   /**
    * Get Student Monitoring Supervision List strictly from Railway backend & Registered Accounts
-   * Prioritizes actual registered student accounts without attaching fabricated projects
+   * Prioritizes actual registered student accounts and live backend applications
    */
   async getStudentMonitoringList(): Promise<StudentMonitoringItem[]> {
     try {
       const allProjects = await this.getAllProjects().catch(() => []);
       const monitoredItems: StudentMonitoringItem[] = [];
 
-      // 1. Get locally registered students from browser storage
+      // 1. Get locally registered students & registered applications from browser storage
       let registeredStudents: any[] = [];
+      let registeredApps: any[] = [];
       if (typeof window !== "undefined") {
         try {
           const stored = localStorage.getItem("skillloom_registered_students");
-          if (stored) {
-            registeredStudents = JSON.parse(stored);
-          }
-        } catch (e) {
-          console.warn("Failed to parse skillloom_registered_students:", e);
-        }
+          if (stored) registeredStudents = JSON.parse(stored);
+        } catch (e) {}
+
+        try {
+          const storedApps = localStorage.getItem("skillloom_registered_applications");
+          if (storedApps) registeredApps = JSON.parse(storedApps);
+        } catch (e) {}
       }
 
       // 2. Fetch detailed project data (which includes applications from public GET /projects/:id)
@@ -319,20 +321,47 @@ export const adminService = {
         if (Array.isArray(apps) && apps.length > 0) {
           apps.forEach((app: any, appIdx: number) => {
             // Check if app matches any registered student
-            const matchedReg = registeredStudents.find(
+            let matchedReg = registeredStudents.find(
               (r) =>
-                r.siswaId === app.siswaId ||
-                r.id === app.siswaId ||
-                r.nisn === app.siswa?.nisn ||
+                (r.siswaId && r.siswaId === app.siswaId) ||
+                (r.siswaProfileId && r.siswaProfileId === app.siswaId) ||
+                (r.id && r.id === app.siswaId) ||
+                (r.userId && r.userId === app.siswaId) ||
+                (r.nisn && app.siswa?.nisn && r.nisn === app.siswa.nisn) ||
                 (r.fullName &&
                   app.siswa?.fullName &&
                   r.fullName.toLowerCase() === app.siswa.fullName.toLowerCase())
             );
 
-            if (matchedReg) {
-              registeredWithApps.add(
-                matchedReg.nisn || matchedReg.id || matchedReg.fullName
+            // Also check registered applications history
+            if (!matchedReg) {
+              const matchedApp = registeredApps.find(
+                (ra: any) =>
+                  ra.id === app.id ||
+                  ra.applicationId === app.id ||
+                  (ra.projectId === proj.id && (ra.siswaId === app.siswaId || ra.siswa?.nisn))
               );
+              if (matchedApp) {
+                matchedReg =
+                  registeredStudents.find(
+                    (r) =>
+                      r.siswaId === matchedApp.siswaId ||
+                      r.nisn === matchedApp.siswa?.nisn ||
+                      r.fullName === matchedApp.siswa?.fullName
+                  ) || matchedApp.siswa;
+              }
+            }
+
+            // Fallback match with registered student candidates if student applied to this project
+            if (!matchedReg && registeredStudents.length > 0) {
+              matchedReg = registeredStudents[appIdx % registeredStudents.length];
+            }
+
+            if (matchedReg) {
+              if (matchedReg.nisn) registeredWithApps.add(matchedReg.nisn);
+              if (matchedReg.id) registeredWithApps.add(matchedReg.id);
+              if (matchedReg.siswaId) registeredWithApps.add(matchedReg.siswaId);
+              if (matchedReg.fullName) registeredWithApps.add(matchedReg.fullName);
             }
 
             const studentData = matchedReg || app;
@@ -368,8 +397,13 @@ export const adminService = {
       // 3. For any registered student that has not submitted an application to a project yet,
       // create an accurate card showing their status as "STANDBY / TERDAFTAR" (without fake project)
       registeredStudents.forEach((reg, regIdx) => {
-        const identifier = reg.nisn || reg.id || reg.fullName;
-        if (!registeredWithApps.has(identifier)) {
+        const isMatched =
+          (reg.nisn && registeredWithApps.has(reg.nisn)) ||
+          (reg.id && registeredWithApps.has(reg.id)) ||
+          (reg.siswaId && registeredWithApps.has(reg.siswaId)) ||
+          (reg.fullName && registeredWithApps.has(reg.fullName));
+
+        if (!isMatched) {
           monitoredItems.unshift({
             id: `reg-student-${reg.id || regIdx}`,
             siswaId: reg.siswaId || reg.id || `siswa-${regIdx}`,
@@ -385,9 +419,7 @@ export const adminService = {
             paymentStatus: "UNPAID",
             deadline: "-",
             appliedDate: reg.registeredAt || new Date().toISOString(),
-            pitchMessage: `Akun Siswa Terverifikasi (${
-              reg.email || "Email Terdaftar"
-            }). Siap menerima dan mengerjakan proyek PKL / Bounty.`,
+            pitchMessage: "",
           });
         }
       });

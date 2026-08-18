@@ -140,7 +140,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const list: any[] = stored ? JSON.parse(stored) : [];
             const newStudent = {
               id: normUser.id,
+              userId: normUser.id,
               siswaId: normUser.siswaProfile.id || normUser.id,
+              siswaProfileId: normUser.siswaProfile.id,
               fullName: normUser.siswaProfile.fullName || normUser.name,
               nisn: normUser.siswaProfile.nisn || "-",
               jurusan: normUser.siswaProfile.jurusan || "RPL",
@@ -191,7 +193,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const list: any[] = stored ? JSON.parse(stored) : [];
           const newStudent = {
             id: userRaw.id || userRaw._id || userRaw.sub,
-            siswaId: userRaw.siswaProfile.id || userRaw.id,
+            userId: userRaw.id || userRaw._id || userRaw.sub,
+            siswaId: userRaw.siswaProfile.id || userRaw.siswaProfile._id || userRaw.id,
+            siswaProfileId: userRaw.siswaProfile.id || userRaw.siswaProfile._id,
             fullName: userRaw.siswaProfile.fullName || userRaw.name,
             nisn: userRaw.siswaProfile.nisn || "-",
             jurusan: userRaw.siswaProfile.jurusan || "RPL",

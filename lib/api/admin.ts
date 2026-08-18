@@ -181,38 +181,23 @@ export const adminService = {
   },
 
   /**
-   * Helper to resolve/synthesize a realistic and robust student profile for an application
+   * Helper to resolve real student info without inventing fake names
    */
   resolveStudentInfo(app: any, fallbackCategory: string = "RPL", index: number = 0) {
     const studentObj = app.siswa || app.siswaProfile || app.user?.siswaProfile || app.user;
-
-    const defaultStudents = [
-      { fullName: "Budi Santoso", nisn: "0068192341", jurusan: "RPL" },
-      { fullName: "Siti Rahmawati", nisn: "0057281923", jurusan: "DKV" },
-      { fullName: "Ahmad Fauzi", nisn: "0061928472", jurusan: "TKJ" },
-      { fullName: "Dewi Lestari", nisn: "0059182374", jurusan: "Multimedia" },
-      { fullName: "Rizky Pratama", nisn: "0063819204", jurusan: "AKL" },
-      { fullName: "Bayu Saputra", nisn: "0054719283", jurusan: "RPL" },
-      { fullName: "Nabila Putri", nisn: "0062847192", jurusan: "DKV" },
-      { fullName: "Fajar Hidayat", nisn: "0059182741", jurusan: "TKJ" },
-    ];
-
-    const fallback = defaultStudents[index % defaultStudents.length];
 
     const fullName =
       studentObj?.fullName ||
       studentObj?.name ||
       app.user?.fullName ||
       (app.user?.email ? app.user.email.split("@")[0] : null) ||
-      fallback.fullName;
+      (app.siswaId ? `Pelamar Siswa (${String(app.siswaId).slice(-4)})` : `Pelamar Siswa #${index + 1}`);
 
     const nisn =
       studentObj?.nisn ||
-      (app.siswaId
-        ? `006${String(app.siswaId).replace(/\D/g, "").slice(-7).padStart(7, "1")}`
-        : fallback.nisn);
+      (app.siswaId ? String(app.siswaId).slice(-10) : "-");
 
-    const jurusan = studentObj?.jurusan || fallbackCategory || fallback.jurusan;
+    const jurusan = studentObj?.jurusan || fallbackCategory || "RPL";
 
     return { fullName, nisn, jurusan };
   },
@@ -253,14 +238,9 @@ export const adminService = {
             totalEscrow += proj.budget || 0;
           }
         });
-        if (totalEscrow === 0 && studentList.length > 0) {
-          totalEscrow = studentList.reduce((sum, s) => sum + (s.budget || 0), 0);
-        }
       }
 
-      const activeStudentsCount = studentList.filter(
-        (s) => s.status === "IN_PROGRESS" || s.status === "OPEN" || s.status === "COMPLETED"
-      ).length;
+      const activeStudentsCount = studentList.length;
 
       // Build jurusan distribution
       const jurusanMap: Record<string, number> = {};
@@ -282,10 +262,10 @@ export const adminService = {
       }));
 
       return {
-        totalSiswaAktif: activeStudentsCount || studentList.length,
+        totalSiswaAktif: activeStudentsCount,
         proyekPendingCount: totalPending,
         proyekApprovedCount: totalApproved,
-        totalMitraUmkm: umkmSet.size > 0 ? umkmSet.size : 5,
+        totalMitraUmkm: umkmSet.size > 0 ? umkmSet.size : 1,
         totalEscrowHeld: totalEscrow,
         jurusanDistribution,
       };
@@ -304,7 +284,7 @@ export const adminService = {
 
   /**
    * Get Student Monitoring Supervision List strictly from Railway backend & Registered Accounts
-   * Prioritizes actual registered student accounts (localStorage) and live project applications
+   * Prioritizes actual registered student accounts without attaching fabricated projects
    */
   async getStudentMonitoringList(): Promise<StudentMonitoringItem[]> {
     try {
@@ -386,41 +366,24 @@ export const adminService = {
       });
 
       // 3. For any registered student that has not submitted an application to a project yet,
-      // create a dedicated supervision card mapped to an available project or department track
+      // create an accurate card showing their status as "STANDBY / TERDAFTAR" (without fake project)
       registeredStudents.forEach((reg, regIdx) => {
         const identifier = reg.nisn || reg.id || reg.fullName;
         if (!registeredWithApps.has(identifier)) {
-          // Match project by category or pick one
-          const matchingProj =
-            allProjects.find(
-              (p) => p.category?.toUpperCase() === reg.jurusan?.toUpperCase()
-            ) || allProjects[regIdx % (allProjects.length || 1)];
-
-          const projectTitle =
-            matchingProj?.title ||
-            `Program Pelatihan & Magang Industri (${reg.jurusan || "Vokasi"})`;
-          const projectId = matchingProj?.id || `proj-reg-${regIdx}`;
-          const companyName = matchingProj?.umkm?.companyName || "SMK Mitra Industri";
-          const industryType = matchingProj?.umkm?.industryType || "Industri Kreatif";
-          const budget = matchingProj?.budget || 1500000;
-          const deadline =
-            matchingProj?.deadline ||
-            new Date(Date.now() + 14 * 86400000).toISOString();
-
           monitoredItems.unshift({
             id: `reg-student-${reg.id || regIdx}`,
             siswaId: reg.siswaId || reg.id || `siswa-${regIdx}`,
             fullName: reg.fullName || "Siswa Terdaftar",
             nisn: reg.nisn || "-",
             jurusan: reg.jurusan || "RPL",
-            projectTitle,
-            projectId,
-            companyName,
-            industryType,
-            budget,
-            status: "IN_PROGRESS",
-            paymentStatus: "ESCROW_HELD",
-            deadline,
+            projectTitle: "Belum Mengambil Proyek (Standby)",
+            projectId: "-",
+            companyName: "Belum Terikat Kontrak UMKM",
+            industryType: "Talenta Vokasi",
+            budget: 0,
+            status: "OPEN",
+            paymentStatus: "UNPAID",
+            deadline: "-",
             appliedDate: reg.registeredAt || new Date().toISOString(),
             pitchMessage: `Akun Siswa Terverifikasi (${
               reg.email || "Email Terdaftar"
@@ -428,119 +391,6 @@ export const adminService = {
           });
         }
       });
-
-      // 4. Only if neither registered students nor live applications exist, use fallback seed talents
-      if (monitoredItems.length === 0) {
-        const seedProjects =
-          allProjects.length > 0
-            ? allProjects
-            : [
-                {
-                  id: "proj-seed-1",
-                  title: "Redesign UI/UX Katalog Produk UMKM",
-                  category: "DKV",
-                  budget: 1500000,
-                  status: "IN_PROGRESS" as const,
-                  deadline: new Date(Date.now() + 14 * 86400000).toISOString(),
-                  createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
-                  umkm: { companyName: "Kopi Maju Jaya", industryType: "Kuliner" },
-                },
-                {
-                  id: "proj-seed-2",
-                  title: "Website Kasir & Point of Sales (POS)",
-                  category: "RPL",
-                  budget: 2500000,
-                  status: "IN_PROGRESS" as const,
-                  deadline: new Date(Date.now() + 21 * 86400000).toISOString(),
-                  createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-                  umkm: { companyName: "Batik Cantik Studio", industryType: "Fashion & Kriya" },
-                },
-                {
-                  id: "proj-seed-3",
-                  title: "Setup Jaringan & Server Inventaris UMKM",
-                  category: "TKJ",
-                  budget: 1800000,
-                  status: "COMPLETED" as const,
-                  deadline: new Date(Date.now() - 2 * 86400000).toISOString(),
-                  createdAt: new Date(Date.now() - 14 * 86400000).toISOString(),
-                  umkm: { companyName: "Bengkel Surya Auto", industryType: "Otomotif & Jasa" },
-                },
-                {
-                  id: "proj-seed-4",
-                  title: "Video Promosi & Motion Graphics Produk",
-                  category: "Multimedia",
-                  budget: 2000000,
-                  status: "IN_PROGRESS" as const,
-                  deadline: new Date(Date.now() + 10 * 86400000).toISOString(),
-                  createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-                  umkm: { companyName: "Snack Nusantara", industryType: "F&B" },
-                },
-                {
-                  id: "proj-seed-5",
-                  title: "Sistem Pembukuan & Laporan Keuangan",
-                  category: "AKL",
-                  budget: 1200000,
-                  status: "COMPLETED" as const,
-                  deadline: new Date(Date.now() - 5 * 86400000).toISOString(),
-                  createdAt: new Date(Date.now() - 20 * 86400000).toISOString(),
-                  umkm: { companyName: "Toko Sembako Makmur", industryType: "Retail" },
-                },
-              ];
-
-        const defaultTalents = [
-          {
-            name: "Budi Santoso",
-            nisn: "0068192341",
-            jur: "RPL",
-            pitch: "Memiliki keahlian Fullstack Next.js dan siap selesaikan tepat waktu.",
-          },
-          {
-            name: "Siti Rahmawati",
-            nisn: "0057281923",
-            jur: "DKV",
-            pitch: "Berpengalaman mendesain branding identitas visual dan UI/UX mobile.",
-          },
-          {
-            name: "Ahmad Fauzi",
-            nisn: "0061928472",
-            jur: "TKJ",
-            pitch: "Sertifikasi Mikrotik MTCNA dan konfigurasi server Linux.",
-          },
-          {
-            name: "Dewi Lestari",
-            nisn: "0059182374",
-            jur: "Multimedia",
-            pitch: "Mahir animasi 2D/3D After Effects dan Premiere Pro.",
-          },
-          {
-            name: "Rizky Pratama",
-            nisn: "0063819204",
-            jur: "AKL",
-            pitch: "Menguasai Microsoft Excel tingkat mahir & Software Akuntansi.",
-          },
-        ];
-
-        seedProjects.forEach((proj, i) => {
-          const talent = defaultTalents[i % defaultTalents.length];
-          monitoredItems.push({
-            id: `seed-app-${i + 1}`,
-            siswaId: `siswa-seed-${i + 1}`,
-            fullName: talent.name,
-            nisn: talent.nisn,
-            jurusan: proj.category || talent.jur,
-            projectTitle: proj.title,
-            projectId: proj.id,
-            companyName: proj.umkm?.companyName || "Mitra UMKM",
-            industryType: proj.umkm?.industryType || "Industri Kreatif",
-            budget: proj.budget,
-            status: proj.status as any,
-            paymentStatus: proj.status === "COMPLETED" ? "RELEASED" : "ESCROW_HELD",
-            deadline: proj.deadline,
-            appliedDate: proj.createdAt,
-            pitchMessage: talent.pitch,
-          });
-        });
-      }
 
       return monitoredItems;
     } catch (error) {

@@ -370,10 +370,16 @@ export default function StudentMonitoringPage() {
                   className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${
                     item.status === "COMPLETED"
                       ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                      : "bg-amber-100 text-amber-800 border border-amber-200"
+                      : item.status === "IN_PROGRESS"
+                      ? "bg-amber-100 text-amber-800 border border-amber-200"
+                      : "bg-blue-50 text-[#0B38E6] border border-blue-200"
                   }`}
                 >
-                  {item.status === "COMPLETED" ? "TUNTAS" : "IN-PROGRESS"}
+                  {item.status === "COMPLETED"
+                    ? "TUNTAS"
+                    : item.status === "IN_PROGRESS"
+                    ? "IN-PROGRESS"
+                    : "STANDBY / TERDAFTAR"}
                 </span>
               </div>
 
@@ -391,7 +397,7 @@ export default function StudentMonitoringPage() {
                     {item.companyName}
                   </span>
                   <span className="font-black text-[#0B38E6]">
-                    {formatRupiah(item.budget)}
+                    {item.budget > 0 ? formatRupiah(item.budget) : "Belum Ada Kontrak"}
                   </span>
                 </div>
               </div>
@@ -401,18 +407,26 @@ export default function StudentMonitoringPage() {
                 <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5 text-slate-400" />
-                    Deadline: {formatDate(item.deadline)}
+                    Deadline: {item.deadline && item.deadline !== "-" ? formatDate(item.deadline) : "-"}
                   </span>
-                  <span className="text-emerald-600 font-bold flex items-center gap-1">
+                  <span className={`font-bold flex items-center gap-1 ${item.paymentStatus === "RELEASED" ? "text-emerald-600" : item.paymentStatus === "ESCROW_HELD" ? "text-amber-600" : "text-slate-400"}`}>
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    {item.paymentStatus === "RELEASED" ? "Dana Dicairkan" : "Escrow Tersimpan"}
+                    {item.paymentStatus === "RELEASED"
+                      ? "Dana Dicairkan"
+                      : item.paymentStatus === "ESCROW_HELD"
+                      ? "Escrow Tersimpan"
+                      : "Standby Penugasan"}
                   </span>
                 </div>
 
                 <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
-                      item.status === "COMPLETED" ? "bg-emerald-500 w-full" : "bg-[#0B38E6] w-3/4"
+                      item.status === "COMPLETED"
+                        ? "bg-emerald-500 w-full"
+                        : item.status === "IN_PROGRESS"
+                        ? "bg-[#0B38E6] w-3/4"
+                        : "bg-slate-300 w-1/12"
                     }`}
                   ></div>
                 </div>
@@ -485,8 +499,20 @@ export default function StudentMonitoringPage() {
                   Mitra: <strong>{selectedStudent.companyName}</strong> ({selectedStudent.industryType || "Industri"})
                 </p>
                 <div className="pt-2 flex items-center justify-between text-xs font-black">
-                  <span>Nominal Bounty: {formatRupiah(selectedStudent.budget)}</span>
-                  <span className="text-emerald-600">Status Escrow: {selectedStudent.paymentStatus}</span>
+                  <span>
+                    Nominal Bounty:{" "}
+                    {selectedStudent.budget > 0
+                      ? formatRupiah(selectedStudent.budget)
+                      : "Belum Ada Kontrak"}
+                  </span>
+                  <span className={selectedStudent.paymentStatus === "RELEASED" ? "text-emerald-600" : selectedStudent.paymentStatus === "ESCROW_HELD" ? "text-amber-600" : "text-slate-500"}>
+                    Status Escrow:{" "}
+                    {selectedStudent.paymentStatus === "RELEASED"
+                      ? "Dana Dicairkan"
+                      : selectedStudent.paymentStatus === "ESCROW_HELD"
+                      ? "Escrow Tersimpan"
+                      : "Belum Ada Escrow"}
+                  </span>
                 </div>
               </div>
 

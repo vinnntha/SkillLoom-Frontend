@@ -30,7 +30,7 @@ export const FloatingCards: React.FC = () => {
                 <h4 className="font-bold text-sm sm:text-base text-white tracking-tight">Averill Kevinatha</h4>
                 <CheckCircle className="w-4 h-4 text-[#A1FF00] fill-slate-950 shrink-0" />
               </div>
-              <p className="text-[11px] sm:text-xs text-white/80 font-mono">NISN: 006849201 • SMKN Telkom Malang</p>
+              <p className="text-[11px] sm:text-xs text-white/80 font-mono">NISN: 006849201 • SMK Telkom Malang</p>
             </div>
           </div>
 

@@ -14,7 +14,8 @@ import {
   Lock,
   ArrowRight,
   TrendingUp,
-  X
+  X,
+  UploadCloud,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
@@ -68,6 +69,30 @@ export default function WalletPortfolioPage() {
   const [showcaseTestimonial, setShowcaseTestimonial] = useState("");
   const [showcaseRating, setShowcaseRating] = useState(5);
   const [isPublishingShowcase, setIsPublishingShowcase] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (!file.type.startsWith("image/")) {
+        setToast({
+          isOpen: true,
+          message: "Harap pilih berkas gambar dengan format PNG, JPG, atau WebP!",
+          type: "error",
+        });
+        return;
+      }
+      setImageFile(file);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setShowcaseImage(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -574,15 +599,47 @@ export default function WalletPortfolioPage() {
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">URL Gambar Screenshot / Cover</label>
-                <input
-                  type="url"
-                  placeholder="https://example.com/screenshot.png"
-                  value={showcaseImage}
-                  onChange={(e) => setShowcaseImage(e.target.value)}
-                  className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:border-[#0B38E6] focus:bg-white font-semibold"
-                />
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                  Unggah Gambar Screenshot Karya (Format PNG / JPG)
+                </label>
+                <div className="relative border-2 border-dashed border-slate-200 hover:border-[#0B38E6] bg-slate-50 hover:bg-white rounded-2xl p-4 text-center transition-all cursor-pointer group">
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/jpg, image/webp"
+                    onChange={handleImageFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  {showcaseImage ? (
+                    <div className="space-y-2 relative z-20">
+                      <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-200 relative group/img">
+                        <img src={showcaseImage} alt="Preview Karya" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowcaseImage("");
+                            setImageFile(null);
+                          }}
+                          className="absolute top-2 right-2 bg-slate-900/80 hover:bg-rose-600 text-white p-1 rounded-full transition-colors cursor-pointer"
+                          title="Hapus gambar"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-[11px] font-bold text-emerald-600 flex items-center justify-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        <span>{imageFile?.name || "Gambar PNG berhasil diunggah"}</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5 py-3">
+                      <UploadCloud className="h-8 w-8 text-[#0B38E6] mx-auto group-hover:scale-110 transition-transform" />
+                      <p className="text-xs font-bold text-slate-700">Pilih atau Tarik File PNG / Gambar di Sini</p>
+                      <p className="text-[10px] text-slate-400 font-medium">Format didukung: PNG, JPG, WEBP (Maks. 5MB)</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1">

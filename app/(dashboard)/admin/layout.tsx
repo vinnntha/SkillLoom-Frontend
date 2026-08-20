@@ -76,7 +76,7 @@ export default function AdminDashboardLayout({
         </div>
         <div className="text-center space-y-1.5">
           <p className="text-xs font-black text-slate-800 tracking-wider uppercase">
-            SkillLoom Admin Portal
+            SkillLoom Admin
           </p>
           <p className="text-xs text-slate-500 font-medium">
             Memuat dashboard supervisi & verifikasi sekolah...
@@ -269,7 +269,7 @@ export default function AdminDashboardLayout({
             className="flex items-center gap-3 w-full px-4 py-2.5 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
-            Keluar dari Portal
+            Keluar
           </button>
         </div>
       </aside>
@@ -387,7 +387,7 @@ export default function AdminDashboardLayout({
                 className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-50"
               >
                 <LogOut className="h-5 w-5" />
-                Keluar Portal
+                Keluar
               </button>
             </div>
           </div>

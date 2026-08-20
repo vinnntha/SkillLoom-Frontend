@@ -155,6 +155,42 @@ export default function WorkspaceDetailPage() {
     }
   }, [applications, selectedAppIndex, user]);
 
+  // Listen for real-time submission & approval updates across tabs/actions
+  useEffect(() => {
+    const handleUpdate = () => {
+      if (applications.length > 0) {
+        const active = applications[selectedAppIndex] || applications[0];
+        const appId = active.id;
+        const projId = active.projectId || active.project?.id;
+        try {
+          const stored =
+            localStorage.getItem(`skillloom_submission_${appId}`) ||
+            (projId ? localStorage.getItem(`skillloom_submission_proj_${projId}`) : null) ||
+            localStorage.getItem(`skillloom_latest_submission`);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            setIsSubmitted(true);
+            if (parsed.submissionLink) setSubmissionLink(parsed.submissionLink);
+            setRevisionInfo({
+              status: parsed.status || "UNDER_REVIEW",
+              note: parsed.revisionNote || "",
+              submittedAt: parsed.submittedAt,
+            });
+
+            if (parsed.status === "APPROVED") {
+              setCurrentStep(4);
+            } else {
+              setCurrentStep(3);
+            }
+          }
+        } catch (e) {}
+      }
+    };
+
+    window.addEventListener("skillloom_submission_updated", handleUpdate);
+    return () => window.removeEventListener("skillloom_submission_updated", handleUpdate);
+  }, [applications, selectedAppIndex]);
+
   // Toast State
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");

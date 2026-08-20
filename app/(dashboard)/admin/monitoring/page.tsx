@@ -73,6 +73,12 @@ export default function StudentMonitoringPage() {
 
   useEffect(() => {
     fetchStudents();
+
+    const handleUpdate = () => {
+      fetchStudents();
+    };
+    window.addEventListener("skillloom_submission_updated", handleUpdate);
+    return () => window.removeEventListener("skillloom_submission_updated", handleUpdate);
   }, []);
 
   const handleRefresh = () => {

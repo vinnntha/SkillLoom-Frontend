@@ -371,6 +371,23 @@ export const adminService = {
               monitoredItems.length + appIdx
             );
 
+            let isCompleted = proj.status === "COMPLETED";
+            if (typeof window !== "undefined") {
+              try {
+                const appIdStr = app.id || app._id;
+                const subStored =
+                  (appIdStr ? localStorage.getItem(`skillloom_submission_${appIdStr}`) : null) ||
+                  localStorage.getItem(`skillloom_submission_proj_${proj.id}`) ||
+                  localStorage.getItem(`skillloom_latest_submission`);
+                const projStored = localStorage.getItem(`skillloom_project_status_${proj.id}`);
+                if (projStored === "COMPLETED") isCompleted = true;
+                if (subStored) {
+                  const parsed = JSON.parse(subStored);
+                  if (parsed.status === "APPROVED") isCompleted = true;
+                }
+              } catch (e) {}
+            }
+
             monitoredItems.push({
               id: app.id || app._id || `app-${proj.id}-${appIdx}`,
               siswaId: app.siswaId || matchedReg?.siswaId || `siswa-${proj.id}-${appIdx}`,
@@ -382,8 +399,8 @@ export const adminService = {
               companyName: proj.umkm?.companyName || "Mitra UMKM",
               industryType: proj.umkm?.industryType,
               budget: proj.budget,
-              status: proj.status || (app.status === "ACCEPTED" ? "IN_PROGRESS" : "OPEN"),
-              paymentStatus: proj.status === "COMPLETED" ? "RELEASED" : "ESCROW_HELD",
+              status: isCompleted ? "COMPLETED" : (proj.status || (app.status === "ACCEPTED" ? "IN_PROGRESS" : "OPEN")),
+              paymentStatus: isCompleted ? "RELEASED" : "ESCROW_HELD",
               deadline: proj.deadline,
               appliedDate: app.createdAt || proj.createdAt || new Date().toISOString(),
               pitchMessage:

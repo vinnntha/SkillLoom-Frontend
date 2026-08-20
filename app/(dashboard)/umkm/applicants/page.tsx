@@ -299,7 +299,7 @@ export default function UmkmApplicantsPage() {
                               {sub.status === "REVISION_REQUESTED"
                                 ? "PERLU REVISI"
                                 : sub.status === "APPROVED"
-                                ? "DISUJUIR / CAIR"
+                                ? "DISETUJUI & DICAIRKAN"
                                 : "MENUNGGU REVIEW"}
                             </span>
                           </div>
@@ -329,21 +329,59 @@ export default function UmkmApplicantsPage() {
                           )}
 
                           {/* Action Buttons for Revision & Approval */}
-                          <div className="flex items-center gap-2 pt-1">
-                            <button
-                              onClick={() => {
-                                const note = prompt("Masukkan catatan revisi untuk siswa:", sub.revisionNote || "Tolong perbaiki tampilan responsif dan penataan layout.");
-                                if (note !== null) {
+                          {sub.status === "APPROVED" ? (
+                            <div className="w-full py-2.5 px-4 rounded-xl bg-emerald-100/80 text-emerald-800 border border-emerald-300 font-extrabold text-xs flex items-center justify-center gap-2 mt-1">
+                              <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                              <span>✓ Hasil Pekerjaan Disetujui & Dana Escrow Dicairkan</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={() => {
+                                  const note = prompt("Masukkan catatan revisi untuk siswa:", sub.revisionNote || "Tolong perbaiki tampilan responsif dan penataan layout.");
+                                  if (note !== null) {
+                                    const updated = {
+                                      ...sub,
+                                      status: "REVISION_REQUESTED",
+                                      revisionNote: note,
+                                      updatedAt: new Date().toISOString(),
+                                    };
+                                    try {
+                                      umkmApi.updateRevisionStatus(app.id, {
+                                        reviewStatus: "REVISION_REQUESTED",
+                                        revisionNote: note,
+                                      }).catch((err) => {
+                                        console.warn("Backend API revision endpoint fallback:", err);
+                                      });
+                                    } catch (e) {}
+                                    try {
+                                      localStorage.setItem(`skillloom_submission_${app.id}`, JSON.stringify(updated));
+                                      localStorage.setItem(`skillloom_submission_proj_${app.projectId}`, JSON.stringify(updated));
+                                      localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
+                                      window.dispatchEvent(new Event("skillloom_submission_updated"));
+                                    } catch (e) {}
+                                    setToast({
+                                      isOpen: true,
+                                      message: "Catatan revisi berhasil dikirim ke Siswa!",
+                                      type: "success",
+                                    });
+                                    setAllApplications((prev) => [...prev]);
+                                  }
+                                }}
+                                className="flex-1 py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200 transition-colors cursor-pointer"
+                              >
+                                ⚠️ Minta Revisi
+                              </button>
+                              <button
+                                onClick={() => {
                                   const updated = {
                                     ...sub,
-                                    status: "REVISION_REQUESTED",
-                                    revisionNote: note,
+                                    status: "APPROVED",
                                     updatedAt: new Date().toISOString(),
                                   };
                                   try {
                                     umkmApi.updateRevisionStatus(app.id, {
-                                      reviewStatus: "REVISION_REQUESTED",
-                                      revisionNote: note,
+                                      reviewStatus: "APPROVED",
                                     }).catch((err) => {
                                       console.warn("Backend API revision endpoint fallback:", err);
                                     });
@@ -352,48 +390,23 @@ export default function UmkmApplicantsPage() {
                                     localStorage.setItem(`skillloom_submission_${app.id}`, JSON.stringify(updated));
                                     localStorage.setItem(`skillloom_submission_proj_${app.projectId}`, JSON.stringify(updated));
                                     localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
+                                    localStorage.setItem(`skillloom_project_status_${app.projectId}`, "COMPLETED");
+                                    localStorage.setItem(`skillloom_app_status_${app.id}`, "ACCEPTED");
+                                    window.dispatchEvent(new Event("skillloom_submission_updated"));
                                   } catch (e) {}
                                   setToast({
                                     isOpen: true,
-                                    message: "Catatan revisi berhasil dikirim ke Siswa!",
+                                    message: "Hasil pekerjaan disetujui! Dana escrow siap dicairkan.",
                                     type: "success",
                                   });
-                                }
-                              }}
-                              className="flex-1 py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs border border-amber-200 transition-colors cursor-pointer"
-                            >
-                              ⚠️ Minta Revisi
-                            </button>
-                            <button
-                              onClick={() => {
-                                const updated = {
-                                  ...sub,
-                                  status: "APPROVED",
-                                  updatedAt: new Date().toISOString(),
-                                };
-                                try {
-                                  umkmApi.updateRevisionStatus(app.id, {
-                                    reviewStatus: "APPROVED",
-                                  }).catch((err) => {
-                                    console.warn("Backend API revision endpoint fallback:", err);
-                                  });
-                                } catch (e) {}
-                                try {
-                                  localStorage.setItem(`skillloom_submission_${app.id}`, JSON.stringify(updated));
-                                  localStorage.setItem(`skillloom_submission_proj_${app.projectId}`, JSON.stringify(updated));
-                                  localStorage.setItem(`skillloom_latest_submission`, JSON.stringify(updated));
-                                } catch (e) {}
-                                setToast({
-                                  isOpen: true,
-                                  message: "Hasil pekerjaan disetujui! Dana escrow siap dicairkan.",
-                                  type: "success",
-                                });
-                              }}
-                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs transition-colors cursor-pointer"
-                            >
-                              ✓ ACC & Release
-                            </button>
-                          </div>
+                                  setAllApplications((prev) => [...prev]);
+                                }}
+                                className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs transition-colors cursor-pointer"
+                              >
+                                ✓ ACC & Release
+                              </button>
+                            </div>
+                          )}
                         </div>
                       );
                     })()

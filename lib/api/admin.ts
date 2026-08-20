@@ -181,6 +181,23 @@ export const adminService = {
   },
 
   /**
+   * Create new Showcase item (POST /showcases)
+   */
+  async createShowcase(payload: {
+    projectId?: string;
+    title: string;
+    imageUrl: string;
+    testimonial?: string;
+    rating?: number;
+    isFeatured?: boolean;
+  }): Promise<ShowcaseItem> {
+    return adminFetcher<ShowcaseItem>("/showcases", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  /**
    * Helper to resolve real student info without inventing fake names
    */
   resolveStudentInfo(app: any, fallbackCategory: string = "RPL", index: number = 0) {

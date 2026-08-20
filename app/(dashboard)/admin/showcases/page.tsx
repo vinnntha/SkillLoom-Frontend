@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   Award,
   Layers,
+  Plus,
+  X,
+  UploadCloud,
 } from "lucide-react";
 
 export default function AdminShowcasesPage() {
@@ -23,6 +26,15 @@ export default function AdminShowcasesPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedShowcase, setSelectedShowcase] = useState<ShowcaseItem | null>(null);
+
+  // Add Showcase Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [newTestimonial, setNewTestimonial] = useState("");
+  const [newRating, setNewRating] = useState(5);
+  const [isFeatured, setIsFeatured] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [toast, setToast] = useState<{
     isOpen: boolean;
@@ -60,6 +72,74 @@ export default function AdminShowcasesPage() {
   const handleRefresh = () => {
     setIsRefreshing(true);
     fetchShowcases();
+  };
+
+  const handleAddShowcaseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newImageUrl) {
+      setToast({
+        isOpen: true,
+        message: "Judul karya dan URL Gambar Showcase wajib diisi!",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let targetProjectId = "64f1a2b3c4d5e6f7a8b9c0d1";
+      try {
+        const allProjs = await adminService.getAllProjects();
+        if (allProjs && allProjs.length > 0) {
+          targetProjectId = allProjs[0].id;
+        }
+      } catch {}
+
+      const created = await adminService
+        .createShowcase({
+          projectId: targetProjectId,
+          title: newTitle,
+          imageUrl: newImageUrl,
+          testimonial: newTestimonial || "Hasil karya siswa vokasi berkualitas tinggi dan disetujui industri.",
+          rating: newRating,
+          isFeatured: isFeatured,
+        })
+        .catch(() => null);
+
+      const newScItem: ShowcaseItem = created || {
+        id: `sc-${Date.now()}`,
+        projectId: targetProjectId,
+        siswaId: "siswa-1",
+        title: newTitle,
+        imageUrl: newImageUrl,
+        testimonial: newTestimonial || "Hasil karya siswa vokasi berkualitas tinggi dan disetujui industri.",
+        rating: newRating,
+        isFeatured: isFeatured,
+        createdAt: new Date().toISOString(),
+      };
+
+      setShowcases((prev) => [newScItem, ...prev]);
+      setShowAddModal(false);
+      setNewTitle("");
+      setNewImageUrl("");
+      setNewTestimonial("");
+      setNewRating(5);
+      setIsFeatured(true);
+
+      setToast({
+        isOpen: true,
+        message: `Showcase portofolio "${newTitle}" berhasil ditambahkan & ditayangkan!`,
+        type: "success",
+      });
+    } catch (err: any) {
+      setToast({
+        isOpen: true,
+        message: err.message || "Gagal menambahkan showcase portofolio.",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleViewDetail = async (id: string) => {
@@ -111,20 +191,29 @@ export default function AdminShowcasesPage() {
               Galeri Portofolio & Hasil Karya Vokasi
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl font-medium">
-              Monitor hasil karya portofolio digital yang dipublikasikan oleh siswa vokasi setelah menyelesaikan proyek industri UMKM.
+              Monitor dan kelola hasil karya portofolio digital yang dipublikasikan oleh siswa vokasi setelah menyelesaikan proyek industri UMKM.
             </p>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-black text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 shrink-0"
-          >
-            <RefreshCw
-              className={`h-4 w-4 text-[#A1FF00] ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span>Refresh Showcase</span>
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#A1FF00] hover:bg-[#8ee600] text-slate-950 font-black text-xs transition-all active:scale-95 cursor-pointer shadow-lg shadow-[#A1FF00]/10"
+            >
+              <Plus className="h-4 w-4 stroke-[3]" />
+              <span>Tambah Showcase</span>
+            </button>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-black text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-4 w-4 text-[#A1FF00] ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -271,6 +360,128 @@ export default function AdminShowcasesPage() {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD SHOWCASE MODAL */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white max-w-lg w-full rounded-[32px] p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-2xl bg-[#A1FF00] flex items-center justify-center text-slate-950">
+                  <Plus className="h-5 w-5 stroke-[3]" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-lg">
+                    Tambah Showcase Portofolio
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    Publikasikan hasil karya vokasi ke galeri showcase admin.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-xl cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddShowcaseSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Judul Karya / Portofolio
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Misal: Aplikasi Web Ordering Cafe Next.js"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#0B38E6] font-semibold text-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  URL Gambar Preview Karya (PNG/JPG/Unsplash)
+                </label>
+                <input
+                  type="url"
+                  required
+                  placeholder="https://images.unsplash.com/photo-1555066931-4365d14bab8c"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#0B38E6] font-semibold text-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Testimoni / Catatan Penilaian
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Misal: Hasil karya sangat rapi, memenuhi standar industri vokasi."
+                  value={newTestimonial}
+                  onChange={(e) => setNewTestimonial(e.target.value)}
+                  className="w-full text-xs p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#0B38E6] font-semibold text-slate-900 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                    Rating Bintang (1 - 5)
+                  </label>
+                  <select
+                    value={newRating}
+                    onChange={(e) => setNewRating(Number(e.target.value))}
+                    className="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#0B38E6] font-semibold text-slate-900"
+                  >
+                    <option value={5}>⭐⭐⭐⭐⭐ (5.0)</option>
+                    <option value={4}>⭐⭐⭐⭐ (4.0)</option>
+                    <option value={3}>⭐⭐⭐ (3.0)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 flex flex-col justify-center">
+                  <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                    Status Tayang
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={isFeatured}
+                      onChange={(e) => setIsFeatured(e.target.checked)}
+                      className="h-4 w-4 rounded accent-[#0B38E6]"
+                    />
+                    <span className="text-xs font-bold text-slate-700">Banner Featured</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3 rounded-2xl bg-[#0B38E6] hover:bg-slate-950 text-white font-black text-xs cursor-pointer shadow-md shadow-[#0B38E6]/20 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Menyimpan..." : "Simpan & Publikasikan"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

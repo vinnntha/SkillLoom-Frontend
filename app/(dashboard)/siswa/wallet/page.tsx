@@ -19,6 +19,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { Toast, ToastType } from "@/components/ui/Toast";
 
 interface PortfolioItem {
   id: string;
@@ -49,6 +50,16 @@ export default function WalletPortfolioPage() {
   const [withdrawMethod, setWithdrawMethod] = useState("gopay");
   const [withdrawAccount, setWithdrawAccount] = useState("");
   const [withdrawStatus, setWithdrawStatus] = useState<"idle" | "loading" | "success">("idle");
+
+  const [toast, setToast] = useState<{
+    isOpen: boolean;
+    message: string;
+    type: ToastType;
+  }>({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
 
   // Showcase Modal State
   const [showShowcaseModal, setShowShowcaseModal] = useState(false);
@@ -137,15 +148,30 @@ export default function WalletPortfolioPage() {
       await refreshUser();
 
       setWithdrawStatus("success");
+      const methodLabel = withdrawMethod.toUpperCase();
+      const amountFormatted = withdrawAmount
+        ? `Rp ${Number(withdrawAmount).toLocaleString("id-ID")}`
+        : "dana";
+
       setTimeout(() => {
         setShowWithdrawModal(false);
         setWithdrawStatus("idle");
+        const withdrawnAmt = withdrawAmount;
+        const accNum = withdrawAccount;
         setWithdrawAmount("");
         setWithdrawAccount("");
-        alert("Permintaan penarikan & pembaruan nomor rekening berhasil diproses ke backend!");
+        setToast({
+          isOpen: true,
+          message: `Penarikan ${amountFormatted} via ${methodLabel} (${accNum}) berhasil diproses!`,
+          type: "success",
+        });
       }, 1000);
     } catch (err: any) {
-      alert(err.message || "Gagal memperbarui rekening. Silakan coba lagi.");
+      setToast({
+        isOpen: true,
+        message: err.message || "Gagal memproses penarikan dana. Silakan coba lagi.",
+        type: "error",
+      });
       setWithdrawStatus("idle");
     }
   };
@@ -154,7 +180,11 @@ export default function WalletPortfolioPage() {
   const handlePublishShowcase = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!showcaseTitle) {
-      alert("Harap masukkan judul karya portofolio!");
+      setToast({
+        isOpen: true,
+        message: "Harap masukkan judul karya portofolio!",
+        type: "error",
+      });
       return;
     }
 
@@ -186,10 +216,18 @@ export default function WalletPortfolioPage() {
       setShowcaseTestimonial("");
       setShowcaseRating(5);
 
-      alert("Showcase portofolio berhasil dipublikasikan ke backend!");
+      setToast({
+        isOpen: true,
+        message: "Showcase portofolio berhasil dipublikasikan!",
+        type: "success",
+      });
       await loadWalletData();
     } catch (err: any) {
-      alert(err.message || "Gagal memublikasikan showcase portofolio.");
+      setToast({
+        isOpen: true,
+        message: err.message || "Gagal memublikasikan showcase portofolio.",
+        type: "error",
+      });
     } finally {
       setIsPublishingShowcase(false);
     }
@@ -570,6 +608,13 @@ export default function WalletPortfolioPage() {
         </div>
       )}
 
+      {/* Global Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

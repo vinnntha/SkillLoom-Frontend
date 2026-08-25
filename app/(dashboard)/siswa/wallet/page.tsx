@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  Download, 
-  Wallet, 
-  Star, 
-  Image as ImageIcon, 
-  ArrowDownRight, 
-  ArrowUpRight, 
-  CheckCircle2, 
+import {
+  Download,
+  Wallet,
+  Star,
+  Image as ImageIcon,
+  ArrowDownRight,
+  ArrowUpRight,
+  CheckCircle2,
   Plus,
   ExternalLink,
   Lock,
@@ -46,7 +46,6 @@ interface Transaction {
 }
 
 export default function WalletPortfolioPage() {
-  const { user, refreshUser } = useAuth();
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawMethod, setWithdrawMethod] = useState("gopay");
@@ -75,78 +74,22 @@ export default function WalletPortfolioPage() {
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-
-      // 1. File Type Check
       if (!file.type.startsWith("image/")) {
         setToast({
           isOpen: true,
-          message: "Harap pilih berkas gambar dengan format PNG, JPG, atau WebP!",
+          message: "Harap pilih berkas gambar dengan format PNG atau JPG",
           type: "error",
         });
         return;
       }
-
-      // 2. File Size Check (Maks. 5MB)
-      const MAX_SIZE_MB = 5;
-      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        setToast({
-          isOpen: true,
-          message: `Ukuran foto (${(file.size / 1024 / 1024).toFixed(2)}MB) melebihi batas maksimal ${MAX_SIZE_MB}MB. Silakan pilih foto dengan ukuran lebih kecil.`,
-          type: "error",
-        });
-        return;
-      }
-
       setImageFile(file);
 
-      // 3. Compress image using Canvas to avoid massive Base64 string payload
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const rawDataUrl = event.target?.result as string;
-        if (!rawDataUrl) return;
-
-        const img = new Image();
-        img.onload = () => {
-          try {
-            const canvas = document.createElement("canvas");
-            let width = img.width;
-            let height = img.height;
-            const maxDimension = 1200; // Resize if width or height exceeds 1200px
-
-            if (width > maxDimension || height > maxDimension) {
-              if (width > height) {
-                height = Math.round((height * maxDimension) / width);
-                width = maxDimension;
-              } else {
-                width = Math.round((width * maxDimension) / height);
-                height = maxDimension;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.drawImage(img, 0, 0, width, height);
-              // Compress to JPEG with 0.8 quality for compact base64 size (~100KB)
-              const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-              setShowcaseImage(compressedDataUrl);
-            } else {
-              setShowcaseImage(rawDataUrl);
-            }
-          } catch (e) {
-            setShowcaseImage(rawDataUrl);
-          }
-        };
-
-        img.onerror = () => {
-          setShowcaseImage(rawDataUrl);
-        };
-
-        img.src = rawDataUrl;
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setShowcaseImage(reader.result);
+        }
       };
-
       reader.readAsDataURL(file);
     }
   };
@@ -215,6 +158,8 @@ export default function WalletPortfolioPage() {
     loadWalletData();
   }, []);
 
+  const { refreshUser } = useAuth();
+
   // Withdraw & Bank update (PATCH /users/profile/siswa)
   const handleWithdrawSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,7 +204,7 @@ export default function WalletPortfolioPage() {
   // Create Showcase (POST /showcases)
   const handlePublishShowcase = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!showcaseTitle.trim()) {
+    if (!showcaseTitle) {
       setToast({
         isOpen: true,
         message: "Harap masukkan judul karya portofolio!",
@@ -281,48 +226,27 @@ export default function WalletPortfolioPage() {
         // Fallback
       }
 
-      const finalImage = showcaseImage || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop";
-
-      try {
-        await api.showcases.create({
-          projectId: targetProjectId,
-          title: showcaseTitle.trim(),
-          imageUrl: finalImage,
-          testimonial: showcaseTestimonial || "Pekerjaan rapi dan sesuai instruksi.",
-          rating: showcaseRating,
-          isFeatured: true,
-        });
-      } catch (backendErr: any) {
-        console.warn("Backend showcase API returned warning/error, adding local showcase item:", backendErr);
-      }
-
-      // Add to local state so user sees item published immediately
-      const newItem: PortfolioItem = {
-        id: `sc-local-${Date.now()}`,
-        title: showcaseTitle.trim(),
-        umkmName: user?.name || "Portfolio Siswa",
-        category: "Vokasi",
+      await api.showcases.create({
+        projectId: targetProjectId,
+        title: showcaseTitle,
+        imageUrl: showcaseImage || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop",
+        testimonial: showcaseTestimonial || "Pekerjaan rapi dan sesuai instruksi.",
         rating: showcaseRating,
-        completionDate: new Date().toLocaleDateString("id-ID"),
-        stipend: "Terverifikasi",
-        department: user?.siswaProfile?.jurusan || "SMK",
-        imageUrl: finalImage,
-      };
-
-      setPortfolioItems((prev) => [newItem, ...prev]);
+        isFeatured: true,
+      });
 
       setShowShowcaseModal(false);
       setShowcaseTitle("");
       setShowcaseImage("");
       setShowcaseTestimonial("");
       setShowcaseRating(5);
-      setImageFile(null);
 
       setToast({
         isOpen: true,
         message: "Showcase portofolio berhasil dipublikasikan!",
         type: "success",
       });
+      await loadWalletData();
     } catch (err: any) {
       setToast({
         isOpen: true,
@@ -357,9 +281,9 @@ export default function WalletPortfolioPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
+
       {/* Top Banner (Wallet & Earnings) */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -369,7 +293,7 @@ export default function WalletPortfolioPage() {
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute bottom-0 right-1/3 -mb-20 w-64 h-64 rounded-full bg-white/5 pointer-events-none" />
         <div className="absolute left-10 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-[#A1FF00]/5 pointer-events-none blur-3xl" />
-        
+
         {/* Left Side: Earnings Info */}
         <div className="relative z-10 space-y-4 text-center md:text-left w-full md:w-auto">
           <div className="flex items-center justify-center md:justify-start gap-2.5">
@@ -390,13 +314,13 @@ export default function WalletPortfolioPage() {
 
         {/* Right Side: Action Buttons */}
         <div className="relative z-10 flex flex-col sm:flex-row gap-3.5 mt-6 md:mt-0 w-full md:w-auto shrink-0">
-          <button 
+          <button
             onClick={() => setShowWithdrawModal(true)}
             className="w-full sm:w-auto bg-[#A1FF00] hover:bg-white text-slate-900 font-black px-8 py-4 rounded-2xl text-xs tracking-wider uppercase transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-[#A1FF00]/15 cursor-pointer"
           >
             Tarik Dana
           </button>
-          <button 
+          <button
             onClick={() => setShowShowcaseModal(true)}
             className="w-full sm:w-auto bg-white/10 hover:bg-white/20 text-white font-bold px-7 py-4 rounded-2xl text-xs tracking-wider uppercase transition-all cursor-pointer flex items-center justify-center gap-2 border border-white/15"
           >
@@ -408,7 +332,7 @@ export default function WalletPortfolioPage() {
 
       {/* Main Container Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
-        
+
         {/* LEFT SECTION (60%): Portfolio Grid */}
         <div className="lg:col-span-6 space-y-6">
           <div className="flex items-center justify-between">
@@ -418,7 +342,7 @@ export default function WalletPortfolioPage() {
               </h2>
               <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Tampilkan portofolio yang disetujui sekolah & UMKM</p>
             </div>
-            
+
             <button
               onClick={handleExportPDF}
               className="bg-white hover:bg-slate-50 text-slate-700 font-bold px-4 py-2.5 rounded-2xl text-xs flex items-center gap-2 border border-slate-100 shadow-sm transition-colors cursor-pointer"
@@ -429,7 +353,7 @@ export default function WalletPortfolioPage() {
           </div>
 
           {/* Portfolio Grid */}
-          <motion.div 
+          <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="show"
@@ -456,7 +380,7 @@ export default function WalletPortfolioPage() {
                     ) : (
                       <ImageIcon className="h-10 w-10 text-slate-350" />
                     )}
-                    
+
                     <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#0B38E6] text-[9px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm border border-blue-50">
                       <CheckCircle2 className="h-3 w-3 text-blue-500 fill-blue-50" />
                       <span>VERIFIED</span>
@@ -511,13 +435,12 @@ export default function WalletPortfolioPage() {
                 transactions.map((tx) => (
                   <div key={tx.id} className="flex items-center justify-between py-3 border-b border-slate-50 last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-2xl ${
-                        tx.type === "income" 
-                          ? "bg-emerald-50 text-emerald-600" 
+                      <div className={`p-2.5 rounded-2xl ${tx.type === "income"
+                          ? "bg-emerald-50 text-emerald-600"
                           : tx.type === "escrow"
-                          ? "bg-amber-50 text-amber-600"
-                          : "bg-rose-50 text-rose-600"
-                      }`}>
+                            ? "bg-amber-50 text-amber-600"
+                            : "bg-rose-50 text-rose-600"
+                        }`}>
                         {tx.type === "income" ? (
                           <ArrowDownRight className="h-4 w-4" />
                         ) : tx.type === "escrow" ? (
@@ -532,13 +455,12 @@ export default function WalletPortfolioPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`font-black text-xs block ${
-                        tx.type === "income" 
-                          ? "text-emerald-600" 
+                      <span className={`font-black text-xs block ${tx.type === "income"
+                          ? "text-emerald-600"
                           : tx.type === "escrow"
-                          ? "text-amber-600"
-                          : "text-slate-800"
-                      }`}>
+                            ? "text-amber-600"
+                            : "text-slate-800"
+                        }`}>
                         {tx.amount}
                       </span>
                       <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">{tx.status}</span>
@@ -585,11 +507,10 @@ export default function WalletPortfolioPage() {
                       key={method.id}
                       type="button"
                       onClick={() => setWithdrawMethod(method.id)}
-                      className={`py-3 rounded-xl text-xs font-bold transition-all border text-center ${
-                        withdrawMethod === method.id 
-                          ? "bg-[#0B38E6] text-white border-transparent" 
+                      className={`py-3 rounded-xl text-xs font-bold transition-all border text-center ${withdrawMethod === method.id
+                          ? "bg-[#0B38E6] text-white border-transparent"
                           : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
-                      }`}
+                        }`}
                     >
                       {method.label}
                     </button>

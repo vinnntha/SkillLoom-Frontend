@@ -21,58 +21,6 @@ import {
   Layers,
 } from "lucide-react";
 
-// Fallback demo projects ensuring ALL status tabs (Pending, Open, In Progress, Completed) have full data
-const DEMO_ADMIN_PROJECTS: any[] = [
-  {
-    id: "proj-demo-pending-1",
-    title: "Sistem Manajemen Kasir UMKM Toko Berkah",
-    description: "Pengembangan sistem kasir POS ritel berbasis Next.js untuk toko kelontong UMKM.",
-    category: "RPL",
-    budget: 3500000,
-    deadline: "2026-09-15T00:00:00.000Z",
-    status: "PENDING",
-    isPendingModeration: true,
-    umkm: { companyName: "Toko Berkah Utama" },
-    createdAt: "2026-08-20T08:00:00.000Z",
-  },
-  {
-    id: "proj-demo-open-2",
-    title: "Website Catalog & Ordering Cafe Vokasi",
-    description: "Pembuatan website katalog menu dan sistem reservasi meja online untuk cafe.",
-    category: "RPL",
-    budget: 4000000,
-    deadline: "2026-09-20T00:00:00.000Z",
-    status: "OPEN",
-    isPendingModeration: false,
-    umkm: { companyName: "Kopi Vokasi Nusantara" },
-    createdAt: "2026-08-18T10:00:00.000Z",
-  },
-  {
-    id: "proj-demo-progress-3",
-    title: "Redesain UI/UX Mobile App Kasir",
-    description: "Desain UI/UX interaktif dengan Figma untuk aplikasi mobile kasir.",
-    category: "DKV",
-    budget: 2500000,
-    deadline: "2026-09-10T00:00:00.000Z",
-    status: "IN_PROGRESS",
-    isPendingModeration: false,
-    umkm: { companyName: "Resto Vokasi Kreatif" },
-    createdAt: "2026-08-10T12:00:00.000Z",
-  },
-  {
-    id: "proj-demo-completed-4",
-    title: "website LMS Vokasi",
-    description: "Pengembangan sistem Learning Management System (LMS) berbasis Next.js dan Tailwind CSS untuk SMK.",
-    category: "RPL",
-    budget: 5000000,
-    deadline: "2026-08-25T00:00:00.000Z",
-    status: "COMPLETED",
-    isPendingModeration: false,
-    umkm: { companyName: "PT Edutech Nusantara" },
-    createdAt: "2026-08-01T09:00:00.000Z",
-  },
-];
-
 export default function AdminProjectsPage() {
   const [allProjects, setAllProjects] = useState<ProjectItem[]>([]);
   const [pendingProjects, setPendingProjects] = useState<PendingProjectItem[]>([]);
@@ -105,31 +53,17 @@ export default function AdminProjectsPage() {
       const apiApproved = Array.isArray(approvedList) ? approvedList : [];
       const apiPending = Array.isArray(pendingList) ? pendingList : [];
 
-      const demoPending = DEMO_ADMIN_PROJECTS.filter((p) => p.isPendingModeration);
-      const demoApproved = DEMO_ADMIN_PROJECTS.filter((p) => !p.isPendingModeration);
-
-      const mergedPending = [...apiPending];
-      demoPending.forEach((dp) => {
-        if (!mergedPending.some((p) => p.id === dp.id)) {
-          mergedPending.push(dp as any);
-        }
-      });
-
-      const mergedApproved = [...apiApproved];
-      demoApproved.forEach((da) => {
-        if (!mergedApproved.some((p) => p.id === da.id || p.title === da.title)) {
-          mergedApproved.push(da as any);
-        }
-      });
-
-      setAllProjects(mergedApproved);
-      setPendingProjects(mergedPending as any);
+      setAllProjects(apiApproved);
+      setPendingProjects(apiPending);
     } catch (err: any) {
       console.error("Gagal mengambil data proyek:", err);
-      const demoPending = DEMO_ADMIN_PROJECTS.filter((p) => p.isPendingModeration);
-      const demoApproved = DEMO_ADMIN_PROJECTS.filter((p) => !p.isPendingModeration);
-      setAllProjects(demoApproved as any);
-      setPendingProjects(demoPending as any);
+      setToast({
+        isOpen: true,
+        message: err.message || "Gagal mengambil data proyek dari backend.",
+        type: "error",
+      });
+      setAllProjects([]);
+      setPendingProjects([]);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);

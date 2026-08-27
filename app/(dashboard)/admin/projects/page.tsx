@@ -49,7 +49,7 @@ const DEMO_ADMIN_PROJECTS: any[] = [
   },
   {
     id: "proj-demo-progress-3",
-    title: "Redesain UI/UX Mobile App Kasir Vokasi",
+    title: "Redesain UI/UX Mobile App Kasir",
     description: "Desain UI/UX interaktif dengan Figma untuk aplikasi mobile kasir.",
     category: "DKV",
     budget: 2500000,

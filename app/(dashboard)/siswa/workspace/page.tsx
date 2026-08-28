@@ -40,38 +40,6 @@ interface Message {
   timestamp: string;
 }
 
-// Fallback demo projects if student has no API applications yet
-const DEMO_APPLICATIONS = [
-  {
-    id: "app-lms-01",
-    projectId: "proj-lms-01",
-    status: "ACCEPTED",
-    createdAt: "2026-08-09T08:00:00.000Z",
-    pitchMessage: "Saya siswa RPL berpengalaman di Next.js & Tailwind CSS. Siap pengerjaan website LMS vokasi.",
-    project: {
-      id: "proj-lms-01",
-      title: "website LMS",
-      description: "Instruksi proyek website LMS: Pembuatan sistem Learning Management System berbasis Next.js dan Tailwind CSS untuk pembelajaran siswa SMK.",
-      budget: 5000000,
-      umkm: { companyName: "umkm" },
-    },
-  },
-  {
-    id: "app-pos-02",
-    projectId: "proj-pos-02",
-    status: "ACCEPTED",
-    createdAt: "2026-07-20T10:00:00.000Z",
-    pitchMessage: "Pengalaman desain UI/UX aplikasi Kasir POS UMKM Ritel menggunakan Figma.",
-    project: {
-      id: "proj-pos-02",
-      title: "Sistem Kasir POS UMKM Mart",
-      description: "Perancangan UI/UX dan sistem kasir digital POS untuk UMKM ritel modern.",
-      budget: 3500000,
-      umkm: { companyName: "Warung Modern Mandiri" },
-    },
-  },
-];
-
 export default function WorkspaceDetailPage() {
   const { user } = useAuth();
 
@@ -124,22 +92,17 @@ export default function WorkspaceDetailPage() {
         if (Array.isArray(data) && data.length > 0) {
           setApplications(data);
         } else {
-          // Check local registered apps
           try {
             const stored = localStorage.getItem("skillloom_registered_applications");
             const localApps = stored ? JSON.parse(stored) : [];
-            if (localApps.length > 0) {
-              setApplications(localApps);
-            } else {
-              setApplications(DEMO_APPLICATIONS);
-            }
+            setApplications(localApps);
           } catch (e) {
-            setApplications(DEMO_APPLICATIONS);
+            setApplications([]);
           }
         }
       } catch (err) {
-        console.warn("Failed to load applications from API, using demo fallback:", err);
-        setApplications(DEMO_APPLICATIONS);
+        console.warn("Failed to load applications from API:", err);
+        setApplications([]);
       } finally {
         setIsLoadingApps(false);
       }

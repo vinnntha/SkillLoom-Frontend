@@ -337,8 +337,8 @@ export const adminService = {
         const apps = proj.applications;
         if (Array.isArray(apps) && apps.length > 0) {
           apps.forEach((app: any, appIdx: number) => {
-            // Check if app matches any registered student
-            let matchedReg = registeredStudents.find(
+            // Check if app matches any registered student in local cache for tracking
+            const matchedReg = registeredStudents.find(
               (r) =>
                 (r.siswaId && r.siswaId === app.siswaId) ||
                 (r.siswaProfileId && r.siswaProfileId === app.siswaId) ||
@@ -350,30 +350,6 @@ export const adminService = {
                   r.fullName.toLowerCase() === app.siswa.fullName.toLowerCase())
             );
 
-            // Also check registered applications history
-            if (!matchedReg) {
-              const matchedApp = registeredApps.find(
-                (ra: any) =>
-                  ra.id === app.id ||
-                  ra.applicationId === app.id ||
-                  (ra.projectId === proj.id && (ra.siswaId === app.siswaId || ra.siswa?.nisn))
-              );
-              if (matchedApp) {
-                matchedReg =
-                  registeredStudents.find(
-                    (r) =>
-                      r.siswaId === matchedApp.siswaId ||
-                      r.nisn === matchedApp.siswa?.nisn ||
-                      r.fullName === matchedApp.siswa?.fullName
-                  ) || matchedApp.siswa;
-              }
-            }
-
-            // Fallback match with registered student candidates if student applied to this project
-            if (!matchedReg && registeredStudents.length > 0) {
-              matchedReg = registeredStudents[appIdx % registeredStudents.length];
-            }
-
             if (matchedReg) {
               if (matchedReg.nisn) registeredWithApps.add(matchedReg.nisn);
               if (matchedReg.id) registeredWithApps.add(matchedReg.id);
@@ -381,7 +357,8 @@ export const adminService = {
               if (matchedReg.fullName) registeredWithApps.add(matchedReg.fullName);
             }
 
-            const studentData = matchedReg || app;
+            // Always resolve real student info directly from backend app data first
+            const studentData = app.siswa || app.siswaProfile || app.user?.siswaProfile || app.user || matchedReg || app;
             const { fullName, nisn, jurusan } = this.resolveStudentInfo(
               studentData,
               proj.category,
@@ -407,10 +384,10 @@ export const adminService = {
 
             monitoredItems.push({
               id: app.id || app._id || `app-${proj.id}-${appIdx}`,
-              siswaId: app.siswaId || matchedReg?.siswaId || `siswa-${proj.id}-${appIdx}`,
-              fullName: matchedReg?.fullName || fullName,
-              nisn: matchedReg?.nisn || nisn,
-              jurusan: matchedReg?.jurusan || jurusan,
+              siswaId: app.siswaId || studentData?.id || `siswa-${proj.id}-${appIdx}`,
+              fullName: fullName,
+              nisn: nisn,
+              jurusan: jurusan,
               projectTitle: proj.title,
               projectId: proj.id,
               companyName: proj.umkm?.companyName || "Mitra UMKM",

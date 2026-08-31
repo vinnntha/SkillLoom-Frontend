@@ -55,7 +55,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="mt-4 sm:mt-6 text-sm sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed px-2 sm:px-0"
           >
-            Hubungkan talenta terbaik <span className="font-bold text-[#A1FF00]">SMK Indonesia</span> dengan proyek nyata <span className="font-bold text-[#A1FF00]">UMKM</span>. Membangun portofolio riil & insentif karya langsung dari bangku sekolah.
+            Hubungkan talenta terbaik <span className="font-bold text-[#A1FF00]">SMK Indonesia</span> dengan proyek nyata <span className="font-bold text-[#A1FF00]">UMKM</span>. Membangun portofolio real & insentif karya langsung dari bangku sekolah.
           </motion.p>
 
           {/* Action Buttons & Circular Badge Positioning */}

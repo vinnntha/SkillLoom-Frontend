@@ -71,19 +71,75 @@ export default function WalletPortfolioPage() {
   const [isPublishingShowcase, setIsPublishingShowcase] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Helper to downscale and compress image files on client-side to prevent "request entity too large" HTTP 413 error
+  const compressImageFile = (file: File, maxDimension = 800, quality = 0.7): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDimension) {
+              height = Math.round((height * maxDimension) / width);
+              width = maxDimension;
+            }
+          } else {
+            if (height > maxDimension) {
+              width = Math.round((width * maxDimension) / height);
+              height = maxDimension;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve((event.target?.result as string) || "");
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress to lightweight JPEG Base64 (~30KB-70KB)
+          const compressedBase64 = canvas.toDataURL("image/jpeg", quality);
+          resolve(compressedBase64);
+        };
+        img.onerror = () => resolve((event.target?.result as string) || "");
+        img.src = (event.target?.result as string) || "";
+      };
+      reader.onerror = () => resolve("");
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith("image/")) {
         setToast({
           isOpen: true,
-          message: "Harap pilih berkas gambar dengan format PNG atau JPG",
+          message: "Harap pilih berkas gambar dengan format PNG, JPG, atau WEBP",
           type: "error",
         });
         return;
       }
       setImageFile(file);
 
+      try {
+        const compressedBase64 = await compressImageFile(file, 800, 0.7);
+        if (compressedBase64) {
+          setShowcaseImage(compressedBase64);
+          return;
+        }
+      } catch (err) {
+        console.warn("Client-side compression fallback:", err);
+      }
+
+      // Standard fallback
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === "string") {
